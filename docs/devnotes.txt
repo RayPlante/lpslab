@@ -1,0 +1,18 @@
+Started with https://github.com/angular/universal-starter
+
+on "npm install", two issues were addressed:
+  1) many warnings about peerDependency mismatches
+
+     in package.json, updated minimum version for @nguniversal/* to
+     7.0.2.  Reran npm install, all fixed.
+
+  2) detected 1 vulnerability with webpack-dev-server
+     - a depenendency of @angular-devkit/build-angular, which is
+       itself a devDependency.
+     - 'npm audit' says need v3.1.11
+     - couldn't figure out how to force it to get that version
+     - @angular-devkit/build-angular required by start script
+     - ignored issue, since it is a dev-time issue only
+
+Confirmed sample app works both client-side only and under ssr.
+

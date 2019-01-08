@@ -17,3 +17,7 @@ on "npm install", two issues were addressed:
 Confirmed sample app works both client-side only and under ssr.
 
 In package.json, angular.json:  change ng-universal-demo to oar-lps
+
+global styles:
+  angular.json, under its "build" config, identfies style files to be
+  loaded globally.  These are compiled into a minified version.

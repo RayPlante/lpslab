@@ -20,15 +20,10 @@
                 "glob": "**/*",
                 "input": "src/assets",
                 "output": "/assets"
-              },
-              {
-                "glob": "favicon.ico",
-                "input": "src",
-                "output": "/"
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles/main.css"
             ],
             "scripts": []
           },

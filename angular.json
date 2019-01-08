@@ -23,7 +23,10 @@
               }
             ],
             "styles": [
-              "src/styles/main.css"
+              "src/styles/main.css",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "node_modules/primeng/resources/primeng.css",
+              "node_modules/primeicons/primeicons.css"
             ],
             "scripts": []
           },

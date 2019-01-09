@@ -21,3 +21,36 @@ In package.json, angular.json:  change ng-universal-demo to oar-lps
 global styles:
   angular.json, under its "build" config, identfies style files to be
   loaded globally.  These are compiled into a minified version.
+
+start up:
+client-only:
+  1. index runs main.ts:
+     when HTML DOM content is loaded, the AppModule is bootstrapped.
+
+  2. AppModule's bootstrap component is constructed and inserted into
+     the DOM at <app-root> element.
+
+server-side:
+  1. server.ts runs:
+     a. loads dist/server/main.js (compiled from main.server.ts?)
+     b. bootstraps AppServerModule
+
+  2. AppServerModule's bootstrap component is constructed and inserted into
+     the DOM at <app-root> element.
+
+Testing
+
+from https://stackoverflow.com/questions/46051134/does-karma-coexist-with-jasmine:
+
+Karma: is a tool which spawns a web server that executes source code against
+test code for each of the browsers connected. The results of each test against
+each browser are examined and displayed via the command line to the developer.
+
+Jasmine: is a development framework for testing js code. It does not depend on
+any other JavaScript frameworks. It does not require a DOM. And it has a
+clean, obvious syntax so that you can easily write tests.
+
+CLI-provided versions for karma & jasmine featured detected vulnerabilities:
+  updated to most recent version to get rid of them.
+
+Had to update karma-jasmine-html-reporter to 1.4.0 to work with jasmine 3.1.0.

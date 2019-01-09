@@ -2,7 +2,17 @@ import { Component, ElementRef } from '@angular/core';
 // import { AppConfig } from '../config-service/config.service';
 
 /**
- * This class represents the headbar component.
+ * A Component that serves as the header of the landing page.  
+ * 
+ * Features include:
+ * * Set as black bar at the top of the page
+ * * NIST PDR logo that links to the PDR home page (currently the SDP)
+ * * PDR-wide links:
+ *   * About page
+ *   * Search page (the SDP)
+ *   * User's Datacart
+ * * Labels indicating the version and status of the PDR
+ *   * this uses the badge style from bootstrap
  */
 @Component({
     moduleId: module.id,

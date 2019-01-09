@@ -6,7 +6,7 @@ page--namely, the header and the footer.
 ## HeadbarComponent
 
 Features:
- * Set as blackbar at the top of the page
+ * Set as a black bar at the top of the page
  * NIST PDR logo that links to the PDR home page (currently the SDP)
  * PDR-wide links:
    * About page

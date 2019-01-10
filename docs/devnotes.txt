@@ -54,3 +54,38 @@ CLI-provided versions for karma & jasmine featured detected vulnerabilities:
   updated to most recent version to get rid of them.
 
 Had to update karma-jasmine-html-reporter to 1.4.0 to work with jasmine 3.1.0.
+
+Providers/DI:
+
+About values to NgModule's providers array property:
+   * a class name, e.g. ClassName, is equivalent to
+     { provide=ClassName, useClass=ClassName }
+   * to instantiate a sub-class, use:
+     { provide=ClassName, useClass=SubClassName }
+   * to use a factory function, use:
+     { provide=ClassName, useFactor=function }
+     The function must return either an instance of the class _or_ an
+     Observable/Promise.
+   * use a provider entry with APP_INITIALIZER (from @angular/core) to insert
+     custom code into the initialization process:
+     { provide : APP_INITIALIZER, useFactory: myInitFunction,
+       deps: [args to fact. func.] }
+   * can provide multiple APP_INITIALIZER provider entries; if so, use multi: true
+   * APP_INITIALIZER is a injection token pointing to a list of void
+     functions; thus can't be used to actually inject something into another service.
+
+About @Inject:
+   * parameter decorator used on constructor parameter
+   * used to give instruction on how in inject a value; if not provided, the
+     class of the parameter will be used to lookup value
+   * use required when the parameter is not an object with a type name (e.g. a
+     primitive)
+   * in @Inject(token), token is the injection token used to do the lookup.
+   * Example:
+      * PLATFORM_ID from @angular/core is an instance of Injection<object>
+      * @Inject(PLATFORM_ID) platId : object -- injects value into platId
+      * In this case, PLATFORM_ID's provider has already made available to
+        the root module, so it does not need to be explicitly listed in the
+        AppModule's providers property.  
+     
+   

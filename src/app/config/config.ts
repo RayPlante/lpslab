@@ -139,3 +139,17 @@ export class AppConfig implements LPSConfig {
     }
 
 }
+
+/**
+ * a factory function for creating an AppInfo instance
+ * 
+ * This function's behavior will depend on whether the app is running on the server 
+ * or in the client's browser, and on whether in development mode or production.  
+ * If running on the server in production, the factory will pull in the configuration
+ * data in from the environment.  If running in the browser, it will look for the 
+ * configuration information from the transfer state.  If the data is not available 
+ * in the transfer state (because it is in development mode), ...
+ */
+export let configFactory : () => AppConfig|null = function() {
+    return null;
+}

@@ -89,3 +89,14 @@ About @Inject:
         AppModule's providers property.  
      
    
+Debugging
+
+temporarily edit karma.config.js to set "single-run: false"
+  * is there a per-launcher way to do this so that this switch is not necessary?
+
+Run tests with "ng test --browsers=Chrome"
+
+Click "DEBUG" button; in new tab, open Chrome debugger
+Click on "Sources", select file to debug, set breakpoints, etc.
+Control-C out of ng
+

@@ -1,14 +1,19 @@
-import { AppConfig, LPSConfig } from './config.ts';
-import * as ngenv from '../../environments/environment';
+import { Inject } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
+import { TransferState, makeStateKey, StateKey } from '@angular/platform-browser';
 import * as proc from 'process';
 import * as fs from 'fs';
 
-export const CONFIG_TS_KEY : string = "LPSConfig";
+import { AppConfig, LPSConfig } from './config';
+import * as ngenv from '../../environments/environment';
+
+export const CONFIG_KEY_NAME : string = "LPSConfig";
+export const CONFIG_TS_KEY : StateKey<string> = makeStateKey(CONFIG_KEY_NAME);
 
 /**
  * create a deep copy of an object
  */
-function deepCopy(obj) {
+export function deepCopy(obj) {
     // this implementation comes courtesy of and with thanks to Steve Fenton via
     // https://stackoverflow.com/questions/28150967/typescript-cloning-object/42758108
     var copy;
@@ -66,7 +71,7 @@ export abstract class ConfigService {
  * This service is intended for use in development mode running either as 
  * client-only in the browser or on the server.  
  */
-class AngularEnvironmentConfigService extends ConfigService {
+export class AngularEnvironmentConfigService extends ConfigService {
     private source : string = "angular-env";
     private defMode : string = "dev";
 
@@ -78,10 +83,10 @@ class AngularEnvironmentConfigService extends ConfigService {
     getConfig() : AppConfig|Promise<AppConfig> {
         console.log("Loading development-mode configuration data from the Angular built-in environment");
         let data : LPSConfig = deepCopy(ngenv.config);
-        let out : AppConfig = AppConfig(data);
+        let out : AppConfig = new AppConfig(data);
         out["source"] = this.source;
         if (!out["env"]) 
-            out["env"] = defMode;
+            out["env"] = this.defMode;
         return out;
     }
 }
@@ -96,7 +101,7 @@ class AngularEnvironmentConfigService extends ConfigService {
  * from oar-docker.  The container launch script pulls configuration from the
  * config-server and writes it to a file.
  */
-class ServerFileConfigService extends ConfigService {
+export class ServerFileConfigService extends ConfigService {
 
     private source : string = "server-file";
     private defMode : string = "prod";       // i.e. in the docker context
@@ -110,6 +115,7 @@ class ServerFileConfigService extends ConfigService {
      *                 existing file.  
      */
     constructor(private cfgfile : string) {
+        super();
         if (! cfgfile)
             throw new Error("Configuration file not provided");
         if (! fs.existsSync(cfgfile))
@@ -125,19 +131,20 @@ class ServerFileConfigService extends ConfigService {
      * already, an actual AppConfig instance will be returned.
      */
     getConfig() : AppConfig|Promise<AppConfig> {
-        if (out)
-            return out;  // previously created AppConfig
+        if (this.out)
+            return this.out;  // previously created AppConfig
 
         console.log("Loading configuration data from " + this.cfgfile);
+
         return new Promise<AppConfig>((resolve, reject) => {
             fs.readFile(this.cfgfile, 'utf8', (err, data) => {
                 if (err) throw err;
 
-                val cfg : LPSConfig = JSON.parse(data);
-                cfg["source"] = source
+                let cfg : LPSConfig = JSON.parse(data);
+                cfg["source"] = this.source;
                 if (! cfg["mode"])
-                    cfg["mode"] = defMode
-                this.out = new AppInfo(cfg)
+                    cfg["mode"] = this.defMode;
+                this.out = new AppConfig(cfg);
                 
                 resolve(this.out);
             });
@@ -148,7 +155,7 @@ class ServerFileConfigService extends ConfigService {
 /**
  * a ConfigService that pulls in data the transfer state
  */
-class TransferStateConfigService extends ConfigService {
+export class TransferStateConfigService extends ConfigService {
 
     private source : string = "transfer-state";
     private defMode : string = "prod";
@@ -157,8 +164,9 @@ class TransferStateConfigService extends ConfigService {
      * create the service given a TransferState container
      */
     constructor(private cache : TransferState) {
+        super();
         if (! cache.hasKey(CONFIG_TS_KEY))
-            throw new Error("Config key not found in TransferState: " + CONFIG_TS_KEY);
+            throw new Error("Config key not found in TransferState: " + CONFIG_KEY_NAME);
     }
 
     /**
@@ -167,7 +175,9 @@ class TransferStateConfigService extends ConfigService {
      * the transfer state.
      */
     getConfig() : AppConfig|Promise<AppConfig> {
-        let data : LPSConfig = cache.get(CONFIG_TS_KEY) as LPSConfig;
+        let data : LPSConfig|null = this.cache.get(CONFIG_TS_KEY, null) as LPSConfig;
+        if (! data)
+            throw new Error("Missing key from transfer state: " + CONFIG_KEY_NAME)
         data["source"] = this.source;
         if (! data["mode"])
             data["mode"] = this.defMode;
@@ -187,8 +197,7 @@ class TransferStateConfigService extends ConfigService {
  * is set in the OS environment variable (OAR_CONFIG_FILE).  If that is 
  * not set, we can assume we are running in development-server mode.
  */
-export newConfigService(@INJECT(PLATFORM_ID) platid : Object,
-                        cache : TransferState)
+export function newConfigService(platid : Object, cache : TransferState)
     : ConfigService
 {
     if (cache.hasKey(CONFIG_TS_KEY))
@@ -197,7 +206,7 @@ export newConfigService(@INJECT(PLATFORM_ID) platid : Object,
 
     if (isPlatformServer(this.platid) && proc.env["OAR_CONFIG_FILE"])
         // this means we're on the server in production-like mode
-        return new TransferStateConfigService(proc.env["OAR_CONFIG_FILE"])
+        return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"])
 
     return new AngularEnvironmentConfigService();
 }

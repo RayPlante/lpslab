@@ -100,3 +100,16 @@ Click "DEBUG" button; in new tab, open Chrome debugger
 Click on "Sources", select file to debug, set breakpoints, etc.
 Control-C out of ng
 
+About @Injectable:
+  * See https://www.amadousall.com/angular-services-3-common-misconceptions-about-the-injectable-decorator/
+  * @Injectable does not do what its name implies.  It is only required when
+    the injectable class itself has dependencies requiring injection--i.e. it
+    has a constructor with arguments provided by an Injector.
+  * If the constructor has arguments that are intended to be provided by a
+    factory (e.g. via useFactory), @Injectable shoud not be used.  Its
+    presence will otherwise cause the Angular compiler (ng) to try to
+    determine it is suppose to inject instances of the arguments (which it is
+    not suppose to).
+
+
+  

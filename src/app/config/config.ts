@@ -95,7 +95,6 @@ export interface LPSConfig {
  * 
  * See {@link LPSConfig} for property documentation.
  */
-@Injectable()
 export class AppConfig implements LPSConfig {
 
     locations : WebLocations;

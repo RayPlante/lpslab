@@ -1,22 +1,23 @@
-import { NgModule, InjectionToken } from '@angular/core';
-import { AppConfig } from './config.ts'
+import { NgModule, PLATFORM_ID } from '@angular/core';
+import { BrowserTransferStateModule, TransferState } from '@angular/platform-browser';
+
+import { AppConfig, LPSConfig, WebLocations } from './config'
+import { ConfigService, newConfigService } from './config.service'
+
+export function getAppConfig(configService: ConfigService) : AppConfig | Promise<AppConfig> {
+    return configService.getConfig();
+}
 
 /**
- * module providing the application configuration infrastructure
+ * a service module providing the application configuration infrastructure.  Its 
+ * ultimate purpose is to provide an AppConfig singleton, containing configuration 
+ * data, making available for injection throughout the app.  
  */
 @NgModule({
-    declarations: [
-        
-        AppConfig,   // class that holds the app's configuration
-        LPSConfig,   // LPS parameters (as an interface)
-        WebLocations // named URLs used in page links
-        
-    ],
     providers: [
-        /* config provider */
-    ],
-    exports: [
-        AppConfig, LPSConfig, WebLocations
+        { provide: ConfigService, useFactory: newConfigService,
+          deps: [ PLATFORM_ID, TransferState ] },
+        { provide: AppConfig, useFactory: getAppConfig, deps: [ ConfigService ] }
     ]
 })
 export class ConfigModule { }

@@ -109,6 +109,35 @@ export class AppConfig implements LPSConfig {
     constructor(params : LPSConfig) {
         for (var key in params) 
             this[key] = params[key];
+        this.inferMissingValues();
+    }
+
+    /*
+     * set some defaults for missing configuration values based on what has been
+     * set.  
+     */
+    private inferMissingValues() : void {
+        if (! this.locations.portalBase) {
+            this.locations.portalBase = this.locations.orgHome;
+            if (! this.locations.portalBase.endsWith('/'))
+                this.locations.portalBase += '/';
+            this.locations.portalBase += 'data/';
+        }
+
+        if (! this.locations.pdrHome)
+            this.locations.pdrHome = this.locations.portalBase + "pdr/";
+        if (! this.locations.pdrSearch)
+            this.locations.pdrSearch = this.locations.portalBase + "sdp/";
+        if (! this.locations.distService)
+            this.locations.distService = this.locations.portalBase + "od/ds/";
+        if (! this.locations.mdService)
+            this.locations.mdService = this.locations.portalBase + "rmm/";
+        if (! this.locations.nerdmAbout)
+            this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
+
+        if (! this.mdAPI) this.mdAPI = this.locations.mdService;
+        if (this.status === undefined) this.status = "";
+        if (this.appVersion === undefined) this.appVersion = "";
     }
 
     /**

@@ -1,5 +1,5 @@
 import { Component, ElementRef } from '@angular/core';
-// import { AppConfig } from '../config-service/config.service';
+import { AppConfig } from '../config/config';
 
 /**
  * A Component that serves as the header of the landing page.  
@@ -22,13 +22,16 @@ import { Component, ElementRef } from '@angular/core';
 })
 export class HeadbarComponent {
 
-    layoutCompact: boolean = true;
-    layoutMode: string = 'horizontal';
-    searchLink: string = "";
-    status: string = "Dev Version"
+    layoutCompact : boolean = true;
+    layoutMode : string = 'horizontal';
+    searchLink : string = "";
+    status : string = "";
+    appVersion : string = "";
 
-    constructor(private el: ElementRef) {
-        this.searchLink = "https://data.nist.org/sdp/";
+    constructor(private el: ElementRef, private cfg : AppConfig) {
+        this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
+        this.status = cfg.get("status", "");
+        this.appVersion = cfg.get("appVersion","");
     }
   
 }

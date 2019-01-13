@@ -204,7 +204,7 @@ export function newConfigService(platid : Object, cache : TransferState)
         // this means we're on (should be) on the browser side
         return new TransferStateConfigService(cache);
 
-    if (isPlatformServer(this.platid) && proc.env["OAR_CONFIG_FILE"])
+    if (isPlatformServer(platid) && proc.env["OAR_CONFIG_FILE"])
         // this means we're on the server in production-like mode
         return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"])
 

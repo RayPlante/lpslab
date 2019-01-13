@@ -1,4 +1,4 @@
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, BrowserTransferStateModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 // import { TransferHttpCacheModule } from '@nguniversal/common';
 
@@ -15,6 +15,7 @@ import { ConfigModule } from './config/config.module';
     ],
     imports: [
         BrowserModule.withServerTransition({appId: 'my-app'}),
+        BrowserTransferStateModule,
         ConfigModule,  // provider for AppConfig
         FrameModule
     ],

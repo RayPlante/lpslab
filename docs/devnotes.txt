@@ -64,8 +64,9 @@ About values to NgModule's providers array property:
      { provide=ClassName, useClass=SubClassName }
    * to use a factory function, use:
      { provide=ClassName, useFactor=function }
-     The function must return either an instance of the class _or_ an
-     Observable/Promise.
+     The function must return either an instance of the class.  NOTE:
+     Only in the case of APP_INITIALIZER can you alternatively return a
+     Promise!
    * use a provider entry with APP_INITIALIZER (from @angular/core) to insert
      custom code into the initialization process:
      { provide : APP_INITIALIZER, useFactory: myInitFunction,

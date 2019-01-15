@@ -4,8 +4,10 @@ import { BrowserTransferStateModule, TransferState } from '@angular/platform-bro
 import { AppConfig, LPSConfig, WebLocations } from './config'
 import { ConfigService, newConfigService } from './config.service'
 
-export function getAppConfig(configService: ConfigService) : AppConfig | Promise<AppConfig> {
-    return configService.getConfig();
+export function getAppConfig(configService: ConfigService) : AppConfig {
+    let out : AppConfig = configService.getConfig();
+    console.log("App status, according to configuration: " + out.status);
+    return out;
 }
 
 /**

@@ -49,7 +49,6 @@ export function deepCopy(obj) {
     throw new Error("Unable to copy obj! Its type isn't supported.");
 }
 
-
 /**
  * a service that will create an AppConfig instance loaded with values 
  * approriate for the runtime context.
@@ -60,7 +59,7 @@ export abstract class ConfigService {
      * return an AppConfig instance that is appropriate for the runtime 
      * context.
      */
-    abstract getConfig() : AppConfig|Promise<AppConfig>; 
+    abstract getConfig() : AppConfig; 
     
 }
 
@@ -80,7 +79,7 @@ export class AngularEnvironmentConfigService extends ConfigService {
      * context.  This will asynchronously return an AppConfig rather than a 
      * Promise.  
      */
-    getConfig() : AppConfig|Promise<AppConfig> {
+    getConfig() : AppConfig {
         console.log("Loading development-mode configuration data from the Angular built-in environment");
         let data : LPSConfig = deepCopy(ngenv.config);
         let out : AppConfig = new AppConfig(data);
@@ -111,8 +110,7 @@ export class ServerFileConfigService extends ConfigService {
      * construct the service.  
      * 
      * @param cfgfile   the (full) path to the file to read JSON-encoded data from
-     * @throw Error -- if OAR_CONFIG_FILE is not set or does not point to an 
-     *                 existing file.  
+     * @throw Error -- if cfgfile is not set or does not point to an existing file.  
      */
     constructor(private cfgfile : string) {
         super();
@@ -130,25 +128,18 @@ export class ServerFileConfigService extends ConfigService {
      * Error if there is trouble reading the file.  If the data was successfully read
      * already, an actual AppConfig instance will be returned.
      */
-    getConfig() : AppConfig|Promise<AppConfig> {
+    getConfig() : AppConfig {
         if (this.out)
             return this.out;  // previously created AppConfig
 
         console.log("Loading configuration data from " + this.cfgfile);
 
-        return new Promise<AppConfig>((resolve, reject) => {
-            fs.readFile(this.cfgfile, 'utf8', (err, data) => {
-                if (err) throw err;
-
-                let cfg : LPSConfig = JSON.parse(data);
-                cfg["source"] = this.source;
-                if (! cfg["mode"])
-                    cfg["mode"] = this.defMode;
-                this.out = new AppConfig(cfg);
-                
-                resolve(this.out);
-            });
-        });
+        // synchronous read.  (The file is typically short.)
+        let cfg : LPSConfig = JSON.parse(fs.readFileSync(this.cfgfile, 'utf8'));
+        cfg["source"] = this.source;
+        if (! cfg["mode"])
+            cfg["mode"] = this.defMode;
+        return new AppConfig(cfg);
     }
 }
 
@@ -174,7 +165,7 @@ export class TransferStateConfigService extends ConfigService {
      * context.  This implementation extracts the configuration data from 
      * the transfer state.
      */
-    getConfig() : AppConfig|Promise<AppConfig> {
+    getConfig() : AppConfig {
         let data : LPSConfig|null = this.cache.get(CONFIG_TS_KEY, null) as LPSConfig;
         if (! data)
             throw new Error("Missing key from transfer state: " + CONFIG_KEY_NAME)

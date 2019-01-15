@@ -1,0 +1,11 @@
+{
+    "locations": {
+        "orgHome":      "https://nist.gov",
+        "portalBase":   "https://data.nist.gov",
+        "pdrHome":      "https://data.nist.gov/pdr/",
+        "pdrSearch":    "https://data.nist.gov/sdp/"
+    },
+    "mode":   "dev",
+    "status": "Dev-Server Version",
+    "appVersion": "v1.1.0"
+}

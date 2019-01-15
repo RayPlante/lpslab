@@ -29,6 +29,8 @@ export class HeadbarComponent {
     appVersion : string = "";
 
     constructor(private el: ElementRef, private cfg : AppConfig) {
+        if (! (cfg instanceof AppConfig))
+            throw new Error("HeadbarComponent: Wrong config type provided: "+cfg);
         this.searchLink = cfg.get("locations.pdrSearch", "/sdp/");
         this.status = cfg.get("status", "");
         this.appVersion = cfg.get("appVersion","");

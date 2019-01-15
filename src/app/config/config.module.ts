@@ -6,7 +6,7 @@ import { ConfigService, newConfigService } from './config.service'
 
 export function getAppConfig(configService: ConfigService) : AppConfig {
     let out : AppConfig = configService.getConfig();
-    console.log("App status, according to configuration: " + out.status);
+    console.log("App status, according to the configuration: " + out.status);
     return out;
 }
 

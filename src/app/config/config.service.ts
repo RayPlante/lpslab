@@ -73,6 +73,18 @@ export abstract class ConfigService {
 export class AngularEnvironmentConfigService extends ConfigService {
     private source : string = "angular-env";
     private defMode : string = "dev";
+    private config : AppConfig|null = null;
+
+    /**
+     * construct the service
+     * @param platid   the PLATFORM_ID value for determining if we are running on the server
+     *                 or in the browser.
+     * @param cache    the TransferState instance for the application.  If we are on the server,
+     *                 getConfig() will cache the configuration to the TransferState object.
+     */
+    constructor(private platid : object, private cache : TransferState) {
+        super();
+    }
 
     /**
      * return an AppConfig instance that is appropriate for the runtime 
@@ -80,13 +92,19 @@ export class AngularEnvironmentConfigService extends ConfigService {
      * Promise.  
      */
     getConfig() : AppConfig {
-        console.log("Loading development-mode configuration data from the Angular built-in environment");
-        let data : LPSConfig = deepCopy(ngenv.config);
-        let out : AppConfig = new AppConfig(data);
-        out["source"] = this.source;
-        if (!out["env"]) 
-            out["env"] = this.defMode;
-        return out;
+        if (! this.config) {
+            console.log("Loading development-mode configuration data from the Angular built-in environment");
+            let data : LPSConfig = deepCopy(ngenv.config);
+            let out : AppConfig = new AppConfig(data);
+            out["source"] = this.source;
+            if (! out["env"]) 
+                out["env"] = this.defMode;
+
+            if (isPlatformServer(this.platid))
+                this.cache.set(CONFIG_TS_KEY, out);
+            this.config = out;
+        }
+        return this.config;
     }
 }
 
@@ -104,7 +122,7 @@ export class ServerFileConfigService extends ConfigService {
 
     private source : string = "server-file";
     private defMode : string = "prod";       // i.e. in the docker context
-    private out : AppConfig|null = null;
+    private config : AppConfig|null = null;
 
     /**
      * construct the service.  
@@ -112,7 +130,7 @@ export class ServerFileConfigService extends ConfigService {
      * @param cfgfile   the (full) path to the file to read JSON-encoded data from
      * @throw Error -- if cfgfile is not set or does not point to an existing file.  
      */
-    constructor(private cfgfile : string) {
+    constructor(private cfgfile : string, private cache? : TransferState) {
         super();
         if (! cfgfile)
             throw new Error("Configuration file not provided");
@@ -129,17 +147,21 @@ export class ServerFileConfigService extends ConfigService {
      * already, an actual AppConfig instance will be returned.
      */
     getConfig() : AppConfig {
-        if (this.out)
-            return this.out;  // previously created AppConfig
+        if (this.config)
+            return this.config;  // previously created AppConfig
 
         console.log("Loading configuration data from " + this.cfgfile);
 
         // synchronous read.  (The file is typically short.)
-        let cfg : LPSConfig = JSON.parse(fs.readFileSync(this.cfgfile, 'utf8'));
-        cfg["source"] = this.source;
-        if (! cfg["mode"])
-            cfg["mode"] = this.defMode;
-        return new AppConfig(cfg);
+        let out : LPSConfig = JSON.parse(fs.readFileSync(this.cfgfile, 'utf8'));
+        out["source"] = this.source;
+        if (! out["mode"])
+            out["mode"] = this.defMode;
+
+        this.config = new AppConfig(out);
+        if (this.cache)
+            this.cache.set(CONFIG_TS_KEY, this.config);
+        return this.config;
     }
 }
 
@@ -166,6 +188,8 @@ export class TransferStateConfigService extends ConfigService {
      * the transfer state.
      */
     getConfig() : AppConfig {
+        console.log("Loading configuration data delivered from the server.");
+
         let data : LPSConfig|null = this.cache.get(CONFIG_TS_KEY, null) as LPSConfig;
         if (! data)
             throw new Error("Missing key from transfer state: " + CONFIG_KEY_NAME)
@@ -197,7 +221,7 @@ export function newConfigService(platid : Object, cache : TransferState)
 
     if (isPlatformServer(platid) && proc.env["OAR_CONFIG_FILE"])
         // this means we're on the server in production-like mode
-        return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"])
+        return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"], cache)
 
-    return new AngularEnvironmentConfigService();
+    return new AngularEnvironmentConfigService(platid, cache);
 }

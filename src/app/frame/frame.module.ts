@@ -1,6 +1,7 @@
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { HeadbarComponent } from "./headbar.component";
+import { FootbarComponent } from "./footbar.component";
 
 /**
  * A module that provides components that make up the "frame" of the landing 
@@ -8,12 +9,13 @@ import { HeadbarComponent } from "./headbar.component";
  */
 @NgModule({
     declarations: [
-        HeadbarComponent
+        HeadbarComponent,
+        FootbarComponent
     ],
     imports: [
         CommonModule       // provides template directives
     ],
-    exports: [ HeadbarComponent ]
+    exports: [ HeadbarComponent, FootbarComponent ]
 })
 export class FrameModule {
 

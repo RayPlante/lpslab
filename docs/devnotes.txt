@@ -124,4 +124,18 @@ To successfully inject the HTTP response:
   * sometimes it is necessary to inject the Injector into classes that
     need it and use the Injector to get the RESPONSE instance.  
        
-  
+Error Handling:
+  * Places where errors can occur:
+     * during dependency creation for injection: constructor or factory
+       function could fail
+     * within component constructor
+        * ErrorHandler will catch the exception; however, rerouting and HTPP
+          status updating fails silently (if page partially constructed; why?).  
+     * within ngOnInit():
+        * ErrorHandler will catch the exception and rerouting will work;
+          however, component-based updates to HTTP status may not work.
+          The ErrorHandler, on the other hand, can successfully update the 
+          HTTP status itself.
+
+     
+        

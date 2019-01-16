@@ -17,6 +17,7 @@ export class NotFoundComponent implements OnInit {
     {
         // an error here will get caught by the error handler; however,
         // the response status update does not take, nor does re-routing.
+        // 
         // throw new Error("Testing error handling from component constructor");
     }
     
@@ -28,6 +29,7 @@ export class NotFoundComponent implements OnInit {
 
         // an error here will get caught by the error handler; updating the
         // HTTP status code and rerouting in the handler works.
+        // 
         // throw new Error("Testing error handling from ngOnInit");
     }
 }

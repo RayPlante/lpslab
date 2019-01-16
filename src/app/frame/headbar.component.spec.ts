@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { TransferState } from '@angular/platform-browser';
 
 import { HeadbarComponent } from './headbar.component';
 import { AngularEnvironmentConfigService } from '../config/config.service';
@@ -8,9 +9,11 @@ describe('HeadbarComponent', () => {
     let component : HeadbarComponent;
     let fixture : ComponentFixture<HeadbarComponent>;
     let cfg : AppConfig;
+    let plid : Object = "browser";
+    let ts : TransferState = new TransferState();
 
     it('should display configured information', () => {
-        cfg = (new AngularEnvironmentConfigService()).getConfig() as AppConfig;
+        cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
         cfg.status = "Unit Testing";
         cfg.appVersion = "2.test";
@@ -42,7 +45,7 @@ describe('HeadbarComponent', () => {
     });
 
     it('badges are optional', () => {
-        cfg = (new AngularEnvironmentConfigService()).getConfig() as AppConfig;
+        cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
         cfg.locations.pdrSearch = "https://goob.nist.gov/search";
         cfg.status = undefined;
         cfg.appVersion = undefined;

@@ -1,5 +1,5 @@
 import 'zone.js/dist/zone-node';
-import { enableProdMode } from '@angular/core';
+import { enableProdMode, InjectionToken } from '@angular/core';
 
 // Express Engine
 import { ngExpressEngine } from '@nguniversal/express-engine';
@@ -8,6 +8,35 @@ import { provideModuleMap } from '@nguniversal/module-map-ngfactory-loader';
 
 import * as express from 'express';
 import { join } from 'path';
+
+// Load the configuration data.  This is done at start-up so that we can fail
+// fast is something goes wrong.
+import * as proc from 'process';
+import * as fs from 'fs';
+import { LPSConfig } from './src/app/config/config';
+import { CFG_DATA } from './src/app/config/config.service';
+
+let cfgprovider = []
+if (proc.env['OAR_CONFIG_FILE']) {
+    let cfgfile = proc.env['OAR_CONFIG_FILE'];
+    if (! fs.existsSync(cfgfile))
+        throw new Error(cfgfile + ": Config file not found");
+    if (! fs.statSync(cfgfile).isFile())
+        throw new Error(cfgfile + ": Not a file");
+
+    console.log("Expecting to load configuration data from " + cfgfile);
+    // console.log("Loading configuration data from " + cfgfile);
+
+    // Make sure there are no errors reading file.
+    let data : LPSConfig = JSON.parse(fs.readFileSync(cfgfile, 'utf8'));
+    data["source"] = "server-file";
+    if (! data["mode"]) data["mode"] = "prod";
+    
+    // This is not working at the moment:  provider is not visible to
+    // to the AppModule.  We will re-read the file in the ConfigService.
+    // 
+    cfgprovider.push({ provide: CFG_DATA, useValue: data });
+}
 
 // Faster server renders w/ Prod mode (dev mode never needed)
 enableProdMode();
@@ -25,6 +54,7 @@ const { AppServerModuleNgFactory, LAZY_MODULE_MAP } = require('./server/main');
 app.engine('html', ngExpressEngine({
   bootstrap: AppServerModuleNgFactory,
   providers: [
+    cfgprovider,
     provideModuleMap(LAZY_MODULE_MAP)
   ]
 }));
@@ -42,7 +72,7 @@ app.get('*.*', express.static(join(DIST_FOLDER, 'browser'), {
 
 // All regular routes use the Universal engine
 app.get('*', (req, res) => {
-  res.render('index', { req });
+  res.render('index', { req, res });
 });
 
 // Start up the Node server

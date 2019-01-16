@@ -9,8 +9,7 @@ import {Component} from '@angular/core';
     selector: 'app-root',
     template: `
     <pdr-headbar></pdr-headbar>
-    <!-- <router-outlet></router-outlet> -->
-    <p> Empty page </p>
+    <router-outlet></router-outlet>
     <pdr-footbar></pdr-footbar>
     `,
     styleUrls: ['app.component.css']

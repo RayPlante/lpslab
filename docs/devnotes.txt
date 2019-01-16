@@ -112,5 +112,16 @@ About @Injectable:
     determine it is suppose to inject instances of the arguments (which it is
     not suppose to).
 
+Injecting RESPONSE
 
+To successfully inject the HTTP response:
+  * In server.ts, be sure the response (res) is provided in the routing: 
+      // All regular routes use the Universal engine
+      app.get('*', (req, res) => {
+        res.render('index', { req, res });
+      });                          ^^^
+  * use of the ngExpressEngine automatically configures providers for them.  
+  * sometimes it is necessary to inject the Injector into classes that
+    need it and use the Injector to get the RESPONSE instance.  
+       
   

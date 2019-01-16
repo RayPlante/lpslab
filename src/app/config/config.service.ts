@@ -1,4 +1,4 @@
-import { Inject } from '@angular/core';
+import { Inject, InjectionToken } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { TransferState, makeStateKey, StateKey } from '@angular/platform-browser';
 import * as proc from 'process';
@@ -9,6 +9,7 @@ import * as ngenv from '../../environments/environment';
 
 export const CONFIG_KEY_NAME : string = "LPSConfig";
 export const CONFIG_TS_KEY : StateKey<string> = makeStateKey(CONFIG_KEY_NAME);
+export const CFG_DATA : InjectionToken<LPSConfig> = new InjectionToken<LPSConfig>("lpsconfig");
 
 /**
  * create a deep copy of an object
@@ -142,9 +143,7 @@ export class ServerFileConfigService extends ConfigService {
 
     /**
      * return an AppConfig instance that is appropriate for the runtime 
-     * context.  This implementation typically returns a Promise which will result in an 
-     * Error if there is trouble reading the file.  If the data was successfully read
-     * already, an actual AppConfig instance will be returned.
+     * context.  This implementation reads the config data from a JSON file. 
      */
     getConfig() : AppConfig {
         if (this.config)
@@ -159,6 +158,37 @@ export class ServerFileConfigService extends ConfigService {
             out["mode"] = this.defMode;
 
         this.config = new AppConfig(out);
+        if (this.cache)
+            this.cache.set(CONFIG_TS_KEY, this.config);
+        return this.config;
+    }
+}
+
+/**
+ * a server-side ConfigService that provides data that was loaded in when the 
+ * server started. 
+ */
+export class ServerLoadedConfigService extends ConfigService {
+    private config : AppConfig|null = null;
+
+    constructor(private cfgdata : LPSConfig, private cache? : TransferState) {
+        super();
+        if (! cfgdata)
+            throw new Error("Server failed to load config data");
+    }
+
+    /**
+     * return an AppConfig instance that is appropriate for the runtime context.  
+     * This implementation loads that that was previously loaded by the server at 
+     * start-up time.  
+     */
+    getConfig() : AppConfig {
+        if (this.config)
+            return this.config;  // previously created AppConfig
+
+        console.log("Loading configuration data previously loaded by server");
+
+        this.config = new AppConfig(this.cfgdata);
         if (this.cache)
             this.cache.set(CONFIG_TS_KEY, this.config);
         return this.config;
@@ -211,17 +241,31 @@ export class TransferStateConfigService extends ConfigService {
  * on the server, we can retrieve the data from a local file whose path
  * is set in the OS environment variable (OAR_CONFIG_FILE).  If that is 
  * not set, we can assume we are running in development-server mode.
+ *
+ * @param platid    the PLATFORM_ID for determining if we are running on the server
+ * @param cache     a TransferState instance to check for config data
+ * @param cfgdata   LPSConfig object that contains the configuration data loaded 
+ *                    explicitly by some other means.  This is the intended way to 
+ *                    pass in data loaded explicitly by the server.  
  */
-export function newConfigService(platid : Object, cache : TransferState)
+export function newConfigService(platid : Object, cache : TransferState, cfgdata? : LPSConfig)
     : ConfigService
 {
     if (cache.hasKey(CONFIG_TS_KEY))
         // this means we're on (should be) on the browser side
         return new TransferStateConfigService(cache);
 
+    if (isPlatformServer(platid) && cfgdata)
+        // this means we're on the server in production-like mode
+        // this will stash the data into the TransferState
+        return new ServerLoadedConfigService(cfgdata, cache)
+
     if (isPlatformServer(platid) && proc.env["OAR_CONFIG_FILE"])
         // this means we're on the server in production-like mode
+        // this will stash the data into the TransferState
         return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"], cache)
 
+    // This is the default intended for a development context
+    // this will stash the data into the TransferState
     return new AngularEnvironmentConfigService(platid, cache);
 }

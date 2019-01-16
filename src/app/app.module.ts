@@ -5,21 +5,28 @@ import { NgModule } from '@angular/core';
 import { AppComponent } from './app.component';
 import { FrameModule } from './frame/frame.module';
 import { ConfigModule } from './config/config.module';
+import { ErrorHandler } from '@angular/core'
+import { ErrorsModule, AppErrorHandler } from './errors/errors.module';
+import { AppRoutingModule } from './app-routing.module';
 
 /**
  * The root module for the Landing Page Service app.
  */
 @NgModule({
-    declarations: [
-        AppComponent
-    ],
     imports: [
         BrowserModule.withServerTransition({appId: 'my-app'}),
         BrowserTransferStateModule,
         ConfigModule,  // provider for AppConfig
-        FrameModule
+        FrameModule,
+        ErrorsModule,
+        AppRoutingModule
+    ],
+    declarations: [
+        AppComponent
     ],
     providers: [
+        AppErrorHandler,
+        { provide: ErrorHandler, useClass: AppErrorHandler }
     ],
     bootstrap: [AppComponent]
 })

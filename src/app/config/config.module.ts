@@ -1,8 +1,8 @@
-import { NgModule, PLATFORM_ID } from '@angular/core';
+import { NgModule, PLATFORM_ID, Optional } from '@angular/core';
 import { BrowserTransferStateModule, TransferState } from '@angular/platform-browser';
 
 import { AppConfig, LPSConfig, WebLocations } from './config'
-import { ConfigService, newConfigService } from './config.service'
+import { ConfigService, newConfigService, CFG_DATA } from './config.service'
 
 export function getAppConfig(configService: ConfigService) : AppConfig {
     let out : AppConfig = configService.getConfig();

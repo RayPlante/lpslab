@@ -2,13 +2,15 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { NotFoundComponent, InternalErrorComponent } from './errors/errors.module';
+import { LandingComponent } from './landing/landing.module';
 
 /**
  * app-level routes
  */
 const appRoutes : Routes = [
     { path: 'not-found', component: NotFoundComponent },
-    { path: 'int-error', component: InternalErrorComponent },  
+    { path: 'int-error', component: InternalErrorComponent },
+    { path: 'id/:id',    component: LandingComponent },
     { path: '',          component: NotFoundComponent,    pathMatch: 'full' },
     { path: '**',        redirectTo: 'not-found' }
 ];

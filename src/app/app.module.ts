@@ -7,6 +7,7 @@ import { FrameModule } from './frame/frame.module';
 import { ConfigModule } from './config/config.module';
 import { ErrorHandler } from '@angular/core'
 import { ErrorsModule, AppErrorHandler } from './errors/errors.module';
+import { LandingModule } from './landing/landing.module';
 import { AppRoutingModule } from './app-routing.module';
 
 /**
@@ -19,6 +20,7 @@ import { AppRoutingModule } from './app-routing.module';
         ConfigModule,  // provider for AppConfig
         FrameModule,
         ErrorsModule,
+        LandingModule,
         AppRoutingModule
     ],
     declarations: [

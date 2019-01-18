@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { LandingComponent } from './landing.component';
 
 /**
- * A component providing the complete display of landing page content associated with 
+ * A module supporting the complete display of landing page content associated with 
  * a resource identifier
  */
 @NgModule({
@@ -14,6 +14,9 @@ import { LandingComponent } from './landing.component';
         LandingComponent
     ],
     providers: [
+    ],
+    exports: [
+        LandingComponent
     ]
 })
 export class LandingModule { }

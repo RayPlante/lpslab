@@ -1,0 +1,229 @@
+import { isPlatformServer } from '@angular/common';
+import { Observable } from 'rxjs';
+import * as rxjs from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import * as fs from 'fs';
+import * as proc from 'process';
+
+import { AppConfig } from '../config/config';
+import { NerdmRes, MetadataTransfer  } from './nerdm';
+
+export const NERDM_MT_PREFIX = "NERDm Resource:";
+
+/**
+ * a service that will retrieve a NERDm record.  Its behavior will depend on the 
+ * runtime context.
+ */
+export abstract class MetadataService {
+
+    /**
+     * retrieve the metadata associated with the current identifier (set at 
+     * construction time).
+     * 
+     * @param id        the NERDm record's identifier
+     * @return Observable<NerdmRes>    an Observable that will resolve to a NERDm record
+     */
+    abstract getMetadata(id : string) : Observable<NerdmRes>;
+}
+
+/**
+ * A Metadata service that wraps another service and which will cache its results
+ */
+export class CachingMetadataService extends MetadataService {
+
+    private del : MetadataService;
+
+    constructor(delegate : MetadataService, private cache? : MetadataTransfer) {
+        super();
+        this.del = delegate;
+        if (! this.cache)
+            this.cache = new MetadataTransfer();
+    }
+
+    cacheRecord(id : string, data : NerdmRes) : void {
+        this.cache.set(id, data);
+    }
+
+    getMetadata(id : string) : Observable<NerdmRes> {
+        let rec : NerdmRes = this.cache.get(id) as NerdmRes;
+        if (rec) 
+            return rxjs.of(rec);
+
+        let out$ = this.del.getMetadata(id);
+        out$.subscribe((rcrd) => { this.cacheRecord(id, rcrd); })
+        return out$;
+    }
+}
+
+/**
+ * A MetadataService that loads its metadata from a file on disk.  This implementation
+ * is provided mainly for testing use of the MetadataService on the server side.  It reads 
+ * the metadata from files from a directory specified at construction.  Each file has a name 
+ * of the form, _id_`.json`.  
+ */
+export class ServerDiskCacheMetadataService extends MetadataService {
+
+    /**
+     * create the service.  
+     * 
+     * @param cachedir    the directory containing NERDm resource record files
+     */
+    constructor(private cachedir : string) { super(); }
+
+    /**
+     * retrieve the metadata associated with the current identifier (set at 
+     * construction time).
+     *
+     * This implementation will also cache the loaded metadata to the MetadataTransfer 
+     * instance (if provided at construction) for transfer to the client.
+     * 
+     * @param id   the identifier of the resource to load
+     */
+    getMetadata(id : string) : Observable<NerdmRes> {
+        let file : string = this.cachedir + "/" + id + ".json";
+
+        return new Observable<NerdmRes>((observer) => {
+            if (! fs.existsSync(file))
+                // ID does not exist
+                observer.next(null);
+            
+            if (! fs.statSync(file).isFile())
+                observer.error(new Error(file + ": Not a file"));
+
+            fs.readFile(file, 'utf8', (err, data) => {
+                if (err) 
+                    observer.error(err);
+                else {
+                    try {
+                        observer.next(JSON.parse(data));
+                    } catch (e) {
+                        observer.error(new Error(file + ": " + e.message));
+                    }
+                }
+                observer.complete();
+            });
+        });
+    }
+}
+
+/**
+ * a MetadataService that pulls its data from a MetadataTransfer instance.
+ *
+ * This is intended for browser-side metadata retrieval in which the MetadataTransfer 
+ * instance has the metadata loaded from script elements in the downloaded web page.  
+ */
+export class TransferMetadataService extends MetadataService {
+
+    /**
+     * initialize the service with the MetadataTransfer cache to draw records from
+     */
+    constructor(private mdtrx : MetadataTransfer) { super(); }
+
+    /**
+     * retrieve the metadata associated with the current identifier (set at 
+     * construction time).
+     *
+     * This implementation will also cache the loaded metadata to the MetadataTransfer 
+     * instance (if provided at construction) for transfer to the client.
+     * 
+     * @param id   the identifier of the resource to load
+     */
+    getMetadata(id : string) : Observable<NerdmRes> {
+        return rxjs.of(this.mdtrx.get(NERDM_MT_PREFIX+id) as NerdmRes);
+    }
+}
+
+/**
+ * a MetadataService that retrieves its records from a metadata web service
+ *
+ * In production, this is intended for server-side use only; however, it can also be 
+ * used browser-side for development purposes.  
+ */
+export class RemoteWebMetadataService extends MetadataService {
+
+    /**
+     * initialize the service with the metadata web service endpoint.
+     * 
+     * @param endpoint   the web service endpoint to use.  This implementation will form 
+     *                     a retrieval URL by directly appending the desired ID.  No delimiting
+     *                     slash will be inserted, so the endpoint should include one already
+     *                     if appropriate.  
+     */
+    constructor(private endpoint : string, private webclient : HttpClient) { super(); }
+
+    /**
+     * retrieve the metadata associated with the current identifier (set at 
+     * construction time).
+     *
+     * This implementation will also cache the loaded metadata to the MetadataTransfer 
+     * instance (if provided at construction) for transfer to the client.
+     * 
+     * @param id   the identifier of the resource to load
+     */
+    getMetadata(id : string) : Observable<NerdmRes> {
+        return this.webclient.get(this.endpoint + id) as Observable<NerdmRes>;
+    }
+
+    /**
+     * instantiate a caching version of this service.  
+     */
+    static withCaching(endpoint : string, webclient : HttpClient) : CachingMetadataService {
+        return new CachingMetadataService(new RemoteWebMetadataService(endpoint, webclient));
+    }
+}
+
+/**
+ * A Metadata service that wraps another service and which will transmit metadata 
+ * records requested on the server down to the browser.  
+ */
+export class TransmittingMetadataService extends CachingMetadataService {
+
+    constructor(delegate : MetadataService, mdtrx : MetadataTransfer) {
+        super(delegate, mdtrx);
+    }
+}
+
+/**
+ * create a MetadataService based on the runtime context
+ * 
+ * @param platid     the PLATFORM_ID for determining if we are running on the server
+ * @param endpoint   the base URL for the metadata web service.  The retrieval URL is 
+ *                   formed by appending the ID of the desired resource.
+ * @param httpClient the HttpClient interface to use to retrieve metadata.
+ * @param mdtrx      (optional) the MetadataTransfer object that should be used to transmit
+ *                   metadata records from the server to the browser.  If not provided 
+ *                   (on the server side), none of the requested records will be transmitted.  
+ */
+export function createMetadataService(platid : Object, endpoint : string, httpClient : HttpClient,
+                                      mdtrx? : MetadataTransfer)
+{
+    // Note: this implementation is based on the assumption that the app only needs one
+    // NERDm record--the one for the resource being displayed.  If that assumption is no
+    // longer true, this implementation should be changed (though it is not hard).
+
+    let svc : MetadataService|null = null
+    if (isPlatformServer(platid)) {
+        if (proc.env["PDR_METADATA_SERVICE_URL"])
+            // we're in a server-side development mode
+            svc = new ServerDiskCacheMetadataService(proc.env["PDR_METADATA_SERVICE_URL"]);
+
+        else {
+            // we're in a server-side production-like mode:  get the records from
+            // the web service and transmit them to the browser
+            svc = new RemoteWebMetadataService(endpoint, httpClient);
+            if (mdtrx)
+                // don't need a cache for this context; just plug in the MetadataTransfer
+                return new TransmittingMetadataService(svc, mdtrx);
+        }
+    }
+    else if (mdtrx && mdtrx.labels().length > 0) {
+        // we're in the browser; rely on the MetadataTransfer exclusively
+        return new TransferMetadataService(mdtrx);
+    }
+    else 
+        svc = new RemoteWebMetadataService(endpoint, httpClient);
+
+    return new CachingMetadataService(svc);
+}
+
+

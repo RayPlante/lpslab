@@ -260,7 +260,7 @@ export function newConfigService(platid : Object, cache : TransferState, cfgdata
         // this will stash the data into the TransferState
         return new ServerLoadedConfigService(cfgdata, cache)
 
-    if (isPlatformServer(platid) && proc.env["OAR_CONFIG_FILE"])
+    if (isPlatformServer(platid) && proc.env["PDR_CONFIG_FILE"])
         // this means we're on the server in production-like mode
         // this will stash the data into the TransferState
         return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"], cache)

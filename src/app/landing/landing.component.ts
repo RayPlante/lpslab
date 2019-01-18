@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 
 /**
- * The Landing Page Service root Component.
- * 
- * This component loads into the app-root element in the app's index.html.  
+ * A component providing the complete display of landing page content associated with 
+ * a resource identifier
  */
 @Component({
     selector: 'app-landing',

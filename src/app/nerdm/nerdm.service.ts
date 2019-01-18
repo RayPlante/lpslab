@@ -81,6 +81,7 @@ export class ServerDiskCacheMetadataService extends MetadataService {
      */
     getMetadata(id : string) : Observable<NerdmRes> {
         let file : string = this.cachedir + "/" + id + ".json";
+        console.log("Reading NERDm record from local file: "+file);
 
         return new Observable<NerdmRes>((observer) => {
             if (! fs.existsSync(file))
@@ -161,7 +162,9 @@ export class RemoteWebMetadataService extends MetadataService {
      * @param id   the identifier of the resource to load
      */
     getMetadata(id : string) : Observable<NerdmRes> {
-        return this.webclient.get(this.endpoint + id) as Observable<NerdmRes>;
+        let url = this.endpoint + id;
+        console.log("Pulling NERDm record from metadata service: " + url);
+        return this.webclient.get(url) as Observable<NerdmRes>;
     }
 
     /**
@@ -203,25 +206,33 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
 
     let svc : MetadataService|null = null
     if (isPlatformServer(platid)) {
-        if (proc.env["PDR_METADATA_SERVICE_URL"])
+        if (proc.env["PDR_METADATA_SERVICE_URL"]) {
             // we're in a server-side development mode
+            console.log("Will load NERDm records from directory cache: " +
+                        proc.env["PDR_METADATA_SERVICE_URL"]);
             svc = new ServerDiskCacheMetadataService(proc.env["PDR_METADATA_SERVICE_URL"]);
-
+        }
         else {
             // we're in a server-side production-like mode:  get the records from
             // the web service and transmit them to the browser
+            console.log("Will load NERDm records from remote web service: " + endpoint);
             svc = new RemoteWebMetadataService(endpoint, httpClient);
-            if (mdtrx)
+            if (mdtrx) {
                 // don't need a cache for this context; just plug in the MetadataTransfer
+                console.log("  (...and transfer them to the browser via embeded JSON)");
                 return new TransmittingMetadataService(svc, mdtrx);
+            }
         }
     }
     else if (mdtrx && mdtrx.labels().length > 0) {
         // we're in the browser; rely on the MetadataTransfer exclusively
+        console.log("Will load NERDm record from embedded JSON");
         return new TransferMetadataService(mdtrx);
     }
-    else 
+    else {
+        console.log("Will load NERDm records from remote web service: " + endpoint);
         svc = new RemoteWebMetadataService(endpoint, httpClient);
+    }
 
     return new CachingMetadataService(svc);
 }

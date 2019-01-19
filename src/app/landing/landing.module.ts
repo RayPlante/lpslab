@@ -1,4 +1,5 @@
-import { NgModule } from '@angular/core';
+import { NgModule }     from '@angular/core';
+import { CommonModule } from '@angular/common';
 
 // import { AppConfig } from '../config';
 import { LandingComponent } from './landing.component';
@@ -9,6 +10,7 @@ import { LandingComponent } from './landing.component';
  */
 @NgModule({
     imports: [
+        CommonModule
     ],
     declarations: [
         LandingComponent

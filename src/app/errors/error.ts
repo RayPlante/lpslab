@@ -21,6 +21,8 @@ export class AppErrorHandler implements ErrorHandler {
 
     public handleError(error : any) {
         console.error("LPS Application Error: "+error);
+        if (isPlatformServer(this.platid))
+            console.trace();
         let router : Router|null = null
         try {
             router = this.injector.get(Router) as Router;

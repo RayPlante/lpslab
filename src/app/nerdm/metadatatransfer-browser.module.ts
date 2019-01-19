@@ -17,6 +17,7 @@ export function initBrowserMetadataTransfer(doc : Document) : MetadataTransfer {
     let out : MetadataTransfer = new MetadataTransfer();
 
     let att : string = null;
+    let data : {}|null = null;
     const scripts = doc.body.getElementsByTagName("script");
     for (let i=0; i < scripts.length; i++) {
         att = scripts[i].getAttribute("type");
@@ -26,8 +27,13 @@ export function initBrowserMetadataTransfer(doc : Document) : MetadataTransfer {
         if (!att || att.endsWith("-state"))  // TransferState; don't want this
             continue;
 
+        // att = unescapeHTML(att);
+        console.log("Found embedded record with id='"+att+"'");
         try {
-            out.set(att, JSON.parse(scripts[i].textContent));
+            data = JSON.parse(scripts[i].textContent);
+            if (data == {})
+                data = null;
+            out.set(att, data);
         } catch (e) {
             console.warn('Failed to parse transfered JSON metadata for id='+att+": "+e.message);
         }

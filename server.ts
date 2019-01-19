@@ -17,8 +17,8 @@ import { LPSConfig } from './src/app/config/config';
 import { CFG_DATA } from './src/app/config/config.service';
 
 let cfgprovider = []
-if (proc.env['OAR_CONFIG_FILE']) {
-    let cfgfile = proc.env['OAR_CONFIG_FILE'];
+if (proc.env['PDR_CONFIG_FILE']) {
+    let cfgfile = proc.env['PDR_CONFIG_FILE'];
     if (! fs.existsSync(cfgfile))
         throw new Error(cfgfile + ": Config file not found");
     if (! fs.statSync(cfgfile).isFile())
@@ -36,6 +36,16 @@ if (proc.env['OAR_CONFIG_FILE']) {
     // to the AppModule.  We will re-read the file in the ConfigService.
     // 
     cfgprovider.push({ provide: CFG_DATA, useValue: data });
+}
+
+if (proc.env['PDR_METADATA_DIR']) {
+    let mddir = proc.env['PDR_METADATA_DIR'];
+    if (! fs.existsSync(mddir))
+        throw new Error(mddir + ": Metadata directory not found");
+    if (! fs.statSync(mddir).isDirectory())
+        throw new Error(mddir + ": Not a directory");
+
+    console.log("Expecting to load resource metadata from " + mddir);
 }
 
 // Faster server renders w/ Prod mode (dev mode never needed)

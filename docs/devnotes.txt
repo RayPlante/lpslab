@@ -109,8 +109,8 @@ About @Injectable:
   * If the constructor has arguments that are intended to be provided by a
     factory (e.g. via useFactory), @Injectable shoud not be used.  Its
     presence will otherwise cause the Angular compiler (ng) to try to
-    determine it is suppose to inject instances of the arguments (which it is
-    not suppose to).
+    determine how it is suppose to inject instances of the arguments (which it
+    is not suppose to).
 
 Injecting RESPONSE
 

@@ -44,9 +44,13 @@ export class CachingMetadataService extends MetadataService {
         this.cache.set(id, data);
     }
 
+    queryCache(id : string) : NerdmRes {
+        return this.cache.get(id) as NerdmRes;
+    }
+
     getMetadata(id : string) : Observable<NerdmRes> {
-        let rec : NerdmRes = this.cache.get(id) as NerdmRes;
-        if (rec) 
+        let rec : NerdmRes = this.queryCache(id);
+        if (rec !== undefined) 
             return rxjs.of(rec);
 
         let out$ = this.del.getMetadata(id);
@@ -84,12 +88,18 @@ export class ServerDiskCacheMetadataService extends MetadataService {
         console.log("Reading NERDm record from local file: "+file);
 
         return new Observable<NerdmRes>((observer) => {
-            if (! fs.existsSync(file))
+            if (! fs.existsSync(file)) {
                 // ID does not exist
                 observer.next(null);
+                observer.complete();
+                return;
+            }
             
-            if (! fs.statSync(file).isFile())
+            if (! fs.statSync(file).isFile()) {
                 observer.error(new Error(file + ": Not a file"));
+                observer.complete();
+                return;
+            }
 
             fs.readFile(file, 'utf8', (err, data) => {
                 if (err) 
@@ -184,6 +194,14 @@ export class TransmittingMetadataService extends CachingMetadataService {
     constructor(delegate : MetadataService, mdtrx : MetadataTransfer) {
         super(delegate, mdtrx);
     }
+
+    queryCache(id : string) : NerdmRes {
+        return super.queryCache(NERDM_MT_PREFIX+id);
+    }
+
+    cacheRecord(id : string, data : NerdmRes) : void {
+        super.cacheRecord(NERDM_MT_PREFIX+id, data);
+    }
 }
 
 /**
@@ -206,22 +224,22 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
 
     let svc : MetadataService|null = null
     if (isPlatformServer(platid)) {
-        if (proc.env["PDR_METADATA_SERVICE_URL"]) {
+        if (proc.env["PDR_METADATA_DIR"]) {
             // we're in a server-side development mode
             console.log("Will load NERDm records from directory cache: " +
-                        proc.env["PDR_METADATA_SERVICE_URL"]);
-            svc = new ServerDiskCacheMetadataService(proc.env["PDR_METADATA_SERVICE_URL"]);
+                        proc.env["PDR_METADATA_DIR"]);
+            svc = new ServerDiskCacheMetadataService(proc.env["PDR_METADATA_DIR"]);
         }
         else {
             // we're in a server-side production-like mode:  get the records from
             // the web service and transmit them to the browser
             console.log("Will load NERDm records from remote web service: " + endpoint);
             svc = new RemoteWebMetadataService(endpoint, httpClient);
-            if (mdtrx) {
-                // don't need a cache for this context; just plug in the MetadataTransfer
-                console.log("  (...and transfer them to the browser via embeded JSON)");
-                return new TransmittingMetadataService(svc, mdtrx);
-            }
+        }
+        if (mdtrx) {
+            // don't need a cache for this context; just plug in the MetadataTransfer
+            console.log("  (...and transfer them to the browser via embeded JSON)");
+            return new TransmittingMetadataService(svc, mdtrx);
         }
     }
     else if (mdtrx && mdtrx.labels().length > 0) {

@@ -1,7 +1,7 @@
 {
     "locations": {
         "orgHome":      "https://nist.gov",
-        "portalBase":   "https://data.nist.gov",
+        "portalBase":   "https://data.nist.gov/",
         "pdrHome":      "https://data.nist.gov/pdr/",
         "pdrSearch":    "https://data.nist.gov/sdp/"
     },

@@ -6,10 +6,15 @@
  */
 import { NgModule, InjectionToken } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
-
 import { BEFORE_APP_SERIALIZED } from '@angular/platform-server';
 
 import { MetadataTransfer } from './nerdm';
+
+const escapeHTMLchars = function(text : string, doc : Document) : string {
+    let div = doc.createElement('div');
+    div.appendChild(doc.createTextNode(text));
+    return div.innerHTML.replace(/"/g,'&quot;').replace(/'/g,"&apos;");
+}
 
 /**
  * the factory function for inserting metadata into script elements in the 
@@ -36,12 +41,13 @@ export function serializeMetadataTransferFactory(doc : Document, mdtrx : Metadat
         mdtrx.labels().forEach((label) => {
             let data = mdtrx.get(label);
             if (data == null)
-                return;
+                data = null;
 
             let script = doc.createElement('script');
-            script.id = label;
+            script.id = escapeHTMLchars(label, doc);
+            console.log("Embedding metadata with id='"+script.id+"'");
             let type = "application/json";
-            if (data.hasOwnProperty("@context"))
+            if (data && data.hasOwnProperty("@context"))
                 type = "application/ld+json";
             script.setAttribute("type", type);
             script.textContent = mdtrx.serialize(label);

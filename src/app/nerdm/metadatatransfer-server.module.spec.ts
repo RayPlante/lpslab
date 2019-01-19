@@ -48,4 +48,25 @@ describe('serializeMetadataTransferFactory', function() {
         expect(els[1].getAttribute("type")).toBe("application/ld+json");
     });
 
+    it('resists XSS/injection attacks', function() {
+        let id = 'gotcha">null</scripts>Help!<scripts id="'
+        mdtrx = new MetadataTransfer();
+        mdtrx.set(id, { title: "All about me!" });
+
+        expect(doc.body.firstElementChild).toBeNull();
+        mdt.serializeMetadataTransferFactory(doc, mdtrx)();
+        expect(doc.body.firstElementChild).not.toBeNull();
+
+        let el = doc.body.firstElementChild;
+        let idatt = el.getAttribute("id");
+        console.log("TESTING: metadata saved with id='"+idatt+"'");
+        expect(idatt).not.toBe(id);
+        expect(idatt.includes(">")).not.toBe(true);
+        expect(idatt.includes("<")).not.toBe(true);
+        expect(idatt.includes('"')).not.toBe(true);
+        expect(idatt.includes("&")).toBe(true);
+
+        
+    });
+
 });

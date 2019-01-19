@@ -1,21 +1,30 @@
-import {NgModule} from '@angular/core';
-import {ServerModule, ServerTransferStateModule} from '@angular/platform-server';
-import {ModuleMapLoaderModule} from '@nguniversal/module-map-ngfactory-loader';
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { ServerModule, ServerTransferStateModule } from '@angular/platform-server';
+import { ModuleMapLoaderModule } from '@nguniversal/module-map-ngfactory-loader';
 
-import {AppModule} from './app.module';
-import {AppComponent} from './app.component';
+import { AppModule } from './app.module';
+import { AppComponent } from './app.component';
+import { ServerMetadataTransferModule } from './nerdm/metadatatransfer-server.module';
 
+/**
+ * The root module for the server-side application.  
+ *
+ * Top-level module bits common to both server and browser are imported via the AppModule.
+ */
 @NgModule({
-  imports: [
-    // The AppServerModule should import your AppModule followed
-    // by the ServerModule from @angular/platform-server.
-    AppModule,
-    ServerModule,
-    ModuleMapLoaderModule,
-    ServerTransferStateModule,
-  ],
-  // Since the bootstrapped component is not inherited from your
-  // imported AppModule, it needs to be repeated here.
-  bootstrap: [AppComponent],
+    imports: [
+        // The AppServerModule should import your AppModule followed
+        // by the ServerModule from @angular/platform-server.
+        BrowserModule.withServerTransition({appId: 'PDR-LandingPageService'}),
+        AppModule,
+        ServerModule,
+        ModuleMapLoaderModule,
+        ServerTransferStateModule,
+        ServerMetadataTransferModule
+    ],
+    // Since the bootstrapped component is not inherited from your
+    // imported AppModule, it needs to be repeated here.
+    bootstrap: [AppComponent],
 })
 export class AppServerModule {}

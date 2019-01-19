@@ -2,8 +2,7 @@ import { NgModule }     from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 // import { AppConfig } from '../config';
-import { LandingComponent } from './landing.component';
-import { IdentityModule } from './identity/identity.module';
+import { IdentityComponent } from './identity.component';
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -11,19 +10,18 @@ import { IdentityModule } from './identity/identity.module';
  */
 @NgModule({
     imports: [
-        CommonModule,
-        IdentityModule
+        CommonModule
     ],
     declarations: [
-        LandingComponent
+        IdentityComponent
     ],
     providers: [
     ],
     exports: [
-        LandingComponent
+        IdentityComponent
     ]
 })
-export class LandingModule { }
+export class IdentityModule { }
 
-export { LandingComponent };
+export { IdentityComponent };
     

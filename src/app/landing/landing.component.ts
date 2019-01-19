@@ -72,6 +72,7 @@ export class LandingComponent implements OnInit {
      * 
      * This method will:
      *  * set the page's title (as displayed in the browser title bar).
+     *  * layout the display of the identity metadata
      */
     useMetadata() : void {
         // set the title bar title

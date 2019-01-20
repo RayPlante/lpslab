@@ -8,7 +8,14 @@ import { NerdmRes } from '../nerdm/nerdm';
 
 /**
  * A component providing the complete display of landing page content associated with 
- * a resource identifier
+ * a resource identifier.  This content is handle in various sub-components.
+ * 
+ * Features include:
+ * * an "identity" section, providing title, names, identifiers, and who is repsonsible
+ * * description section, providing thd prose description/abstract, keywords, terms, ...
+ * * a data access section, including a file listing (if files are availabe) and other links
+ * * a references section
+ * * tools and navigation section.
  */
 @Component({
     selector: 'app-landing',

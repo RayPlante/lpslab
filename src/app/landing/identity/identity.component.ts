@@ -9,6 +9,11 @@ import { NerdmRes } from '../../nerdm/nerdm';
  * A component for displaying the identity metadata of a resource.  The identity information 
  * describe how the resource is referred to and who is responsible (e.g. title, authors, DOI, 
  * etc.)
+ * 
+ * Features include:
+ * * a resource type label (e.g. "Data Publication" or "Public Data Resource"
+ * * the resource title
+ * * ...
  */
 @Component({
     selector: 'lp-identity',

@@ -19,28 +19,29 @@ scenarios:
        component layout).  The application runs completely in the browser
        (i.e. without the benefit of server-side rending).  Data is retrieved
        directly by the browser-side app via a configured (RMM) service such as
-       the production one running at data.nist.gov (see [../config](../config)
-       for a description of different configuration scenarios).  The
-       application is started typically by executing `npm run start`.  The
-       `RemoteWebMetadataService` provides this ability, and it is usually
-       wrapped in a `CachingMetadataService` to cache the retrieved metadata in
-       memory. 
+       the production one running at data.nist.gov (see
+       <a href="../config">../config</a> for a description of different
+       configuration scenarios).  The application is started typically by
+       executing <code>npm run start</code>.  The
+       <code>RemoteWebMetadataService</code> provides this ability, and it is
+       usually wrapped in a <code>CachingMetadataService</code> to cache the
+       retrieved metadata in memory.
        </dd>
 
   <dt> Server-side rendering for development </dt>
   <dd> This mode is used with the developer wants to ensure that server-side
        rending is working properly.  The application runs both on the server
        and (then) in the browser and is initiated via the command,
-       `npm run serve:ssr`.  In this setup, the server retrieves the metadata
-       and transmits it to the browser by embedding it in the delivered HTML
-       page using a `MetadataTransfer` instance (see next section).
+       <code>npm run serve:ssr</code>.  In this setup, the server retrieves the
+       metadata and transmits it to the browser by embedding it in the
+       delivered HTML page using a `MetadataTransfer` instance (see next section).
        <p>
-       The browser-side extracts the metadata via the `TransferMetadataService`.
+       The browser-side extracts the metadata via the <code>TransferMetadataService</code>.
        The server-side can retrieve the data from a running web service (like
        the browser did in the previous scenario above) or by reading record
-       files from a directory on disk (via the `ServerDiskCacheMetadataService`).
+       files from a directory on disk (via the <code>ServerDiskCacheMetadataService</code>).
        The latter is triggered setting an environment variable,
-       `PDR_METADATA_DIR`, to the directory containing record files.  </dd>
+       <code>PDR_METADATA_DIR</code>, to the directory containing record files.  </dd>
 
   <dt> Production operation (under oar-docker) </dt>
   <dd> This mode runs just like the previous mode where the server is
@@ -48,13 +49,13 @@ scenarios:
        On the server, it is expected that the docker container that launches
        the server-side app will first retrieve the configuration from the
        config service and write it to a file on disk.  It sets the location of
-       that file into the `PDR_CONFIG_FILE` environment variable (see
-       [../config](../config)).  Further, the container can override the base
-       URL for the metadata service (to set it to a different endpoint in its
-       private docker network) by setting the `PDR_METADATA_SVCEP`.  (This
-       overridden value will not be shared with the client; see
-       [../config](../config) regarding providing configuration to the
-       browser-side app.) 
+       that file into the <code>PDR_CONFIG_FILE</code> environment variable (see
+       <a href="../config">../config</a>).  Further, the container can override
+       the base URL for the metadata service (to set it to a different endpoint
+       in its private docker network) by setting the
+       <code>PDR_METADATA_SVCEP</code>.  (This overridden value will not be
+       shared with the client; see <a href="../config">../config</a>
+       regarding providing configuration to the browser-side app.) 
 </dl>
 
 A `MetadataService` is provided to components via Angular's dependency
@@ -106,9 +107,11 @@ document to the client.  Meanwhile, the `MetadataService` provided to the
 browser-side app will draw its metadata from a `MetadataTransfer` instance that
 has automatically extracted the metadata record from the HTML page.
 
-Serialization is implemented in `[metadatatransfer-server.module.ts]`, and
-deserialization is implemented in `[metadatatransfer-browser.module.ts]`.  Just
-like with the use of `TransferState`, the server-side application module,
+Serialization is implemented in
+[`metadatatransfer-server.module.ts`](metadatatransfer-server.module.ts), and 
+deserialization is implemented in
+[`metadatatransfer-browser.module.ts`](metadatatransfer-browser.module.ts).
+Just like with the use of `TransferState`, the server-side application module,
 `AppServerModule` imports `ServerMetadataTransferModule`, and the browser-side
 imports `BrowserMetadataTransferModule`.
 

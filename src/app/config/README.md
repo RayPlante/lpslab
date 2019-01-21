@@ -29,7 +29,7 @@ the following runtime scenarios:
        <code>AngularEnvironmentConfigService</code> implementation, the
        configuration data is drawn from the <code>config</code> object hard-coded
        into the
-       <code><a href="environments/environment.ts">../../environments/environment.ts</a></code>.
+       <code><a href="../../environments/environment.ts">environments/environment.ts</a></code>.
        The developer is free to edit this file for development and
        testing purposes but normally would not check those changes in.
        </dd>
@@ -101,18 +101,18 @@ from the configuration source file:
         </dd> 
 
    <dt> <code>status</code> </dt>
-   <dd> This value is <em>not<em> set by the <code>ConfigService</code>;
+   <dd> This value is <em>not</em> set by the <code>ConfigService</code>;
         rather, it is set explicitly in the configuration source file.  This
         value, if set, will be displayed (as a "badge") in the header of the
         landing page and serves as a further indicator of the runtime context
         which can be customized by the developer.  The default value set in the
-        <code><a href="../../environments/environments.ts">environement.ts</a></code>
+        <code><a href="../../environments/environment.ts">environement.ts</a></code>
         file is "Dev Version", reflecting the developer's rapid development-cycle
         mode.  "Dev-Server Version" indicates a development mode in which the
         configuration was set on the server and successfully delivered to the
         browser.  "Misconfigured Version" is intended as a signal that the
         value was read from the default 
-        <code><a href="../../environments/environments.prod.ts">environement.prod.ts</a></code>
+        <code><a href="../../environments/environment.prod.ts">environement.prod.ts</a></code>
         file is rather than from, say, the configuration service.  </dd>
 </dl>
 

@@ -220,7 +220,7 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
 {
     // Note: this implementation is based on the assumption that the app only needs one
     // NERDm record--the one for the resource being displayed.  If that assumption is no
-    // longer true, this implementation should be changed (though it is not hard).
+    // longer true, this implementation should be changed (which would not be hard).
 
     let svc : MetadataService|null = null
     if (isPlatformServer(platid)) {

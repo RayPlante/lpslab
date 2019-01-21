@@ -244,9 +244,9 @@ export class TransferStateConfigService extends ConfigService {
  *
  * @param platid    the PLATFORM_ID for determining if we are running on the server
  * @param cache     a TransferState instance to check for config data
- * @param cfgdata   LPSConfig object that contains the configuration data loaded 
- *                    explicitly by some other means.  This is the intended way to 
- *                    pass in data loaded explicitly by the server.  
+ * @param cfgdata   (optional) LPSConfig object that contains the configuration data loaded 
+ *                    explicitly by some other means.  (This hook is intended for future 
+ *                    ways of loading the configuration data on the server.)
  */
 export function newConfigService(platid : Object, cache : TransferState, cfgdata? : LPSConfig)
     : ConfigService
@@ -263,7 +263,7 @@ export function newConfigService(platid : Object, cache : TransferState, cfgdata
     if (isPlatformServer(platid) && proc.env["PDR_CONFIG_FILE"])
         // this means we're on the server in production-like mode
         // this will stash the data into the TransferState
-        return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"], cache)
+        return new ServerFileConfigService(proc.env["PDR_CONFIG_FILE"], cache)
 
     // This is the default intended for a development context
     // this will stash the data into the TransferState

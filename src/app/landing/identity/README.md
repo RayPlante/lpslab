@@ -5,7 +5,7 @@ provides names, identfiers, and the people responsible.  This module
 also contains the constituent components that layout pieces of that
 information.  
 
-## IdenttyComponent
+## IdentityComponent
 
 Features:
  * an "identity" section, providing title, names, identifiers, and who is repsonsible

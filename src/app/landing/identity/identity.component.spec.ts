@@ -5,6 +5,7 @@ import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { IdentityComponent } from './identity.component';
+import { IdentityModule } from './identity.module';
 import { AngularEnvironmentConfigService } from '../../config/config.service';
 import { AppConfig } from '../../config/config'
 import { MetadataTransfer, NerdmRes } from '../../nerdm/nerdm'
@@ -43,9 +44,9 @@ describe('IdentityComponent', () => {
         // title = new mock.Title();
     });
 
-    it('should display identity metadata', () => {
+    let setupComponent = function(rec : NerdmRes) {
         TestBed.configureTestingModule({
-            declarations: [ IdentityComponent ],
+            imports: [ IdentityModule ],
             providers: [
                 { provide: ActivatedRoute,  useValue: route },
                 { provide: ElementRef,      useValue: null },
@@ -56,9 +57,12 @@ describe('IdentityComponent', () => {
 
         fixture = TestBed.createComponent(IdentityComponent);
         component = fixture.componentInstance;
-        component.md = nrd;
+        component.md = rec;
         fixture.detectChanges();
-
+    }
+    
+    it('displays identity metadata', () => {
+        setupComponent(nrd);
         expect(component).toBeDefined();
         expect(component.md.title).toBe("All About Me!");
 
@@ -67,6 +71,6 @@ describe('IdentityComponent', () => {
         expect(el.textContent).toBe(component.md.title);
         el = cmpel.querySelector(".recordType");
         expect(el.textContent).toBe("Standard Reference Data");
-
     });
+
 });

@@ -2,6 +2,7 @@
  * This contains mock implementations of angular interfaces for use in unit testing
  */
 import { convertToParamMap, ParamMap, Params, UrlSegment } from '@angular/router';
+import { Title }    from '@angular/platform-browser';
 import { ReplaySubject } from 'rxjs';
 import * as rxjs from 'rxjs';
 
@@ -92,7 +93,15 @@ export class MockActivatedRoute {
     };
 }
 
-export class MockTitle {
-    public title : string = null;
-    setTitle(title : string) { this.title = title; }
+/**
+ * @deprecated
+ */
+export class MockTitle extends Title {
+    private _title : string = null;
+    constructor() { super(null); }
+    setTitle(title : string) {
+        console.log("updating title to "+title);
+        this._title = title;
+    }
+    getTitle() : string { return this._title; }
 }

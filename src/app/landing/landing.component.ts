@@ -4,7 +4,7 @@ import { Title }    from '@angular/platform-browser';
 
 import { AppConfig } from '../config/config';
 import { MetadataService } from '../nerdm/nerdm.service';
-import { NerdmRes, CurrentResource, CURRENT_RESOURCE, emptyCurrentResource } from '../nerdm/nerdm';
+import { NerdmRes } from '../nerdm/nerdm';
 
 /**
  * A component providing the complete display of landing page content associated with 
@@ -22,8 +22,7 @@ import { NerdmRes, CurrentResource, CURRENT_RESOURCE, emptyCurrentResource } fro
     templateUrl: './landing.component.html',
     styleUrls: ['./landing.component.css'],
     providers: [
-        Title,
-        { provide: CURRENT_RESOURCE, useFactory: emptyCurrentResource }
+        Title
     ]
 })
 export class LandingComponent implements OnInit {
@@ -31,8 +30,8 @@ export class LandingComponent implements OnInit {
     layoutCompact: boolean = true;
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
-    // md : NerdmRes|null = null;
-    // id : string;
+    md : NerdmRes = null;
+    reqId : string;
 
     /**
      * create the component.
@@ -44,11 +43,10 @@ export class LandingComponent implements OnInit {
      * @param res     a CurrentResource object for sharing the metadata and requested 
      *                 ID with child components.
      */
-    constructor(private route : ActivatedRoute, private router : Router, private titleSv : Title, 
-                private cfg : AppConfig, private mdserv : MetadataService,
-                @Inject(CURRENT_RESOURCE) public res : CurrentResource)
+    constructor(private route : ActivatedRoute, private router : Router, public titleSv : Title, 
+                private cfg : AppConfig, private mdserv : MetadataService)
     {
-        this.res.reqId = this.route.snapshot.paramMap.get('id');
+        this.reqId = this.route.snapshot.paramMap.get('id');
     }
 
     /**
@@ -56,12 +54,12 @@ export class LandingComponent implements OnInit {
      * the Angular rendering infrastructure.
      */
     ngOnInit() {
-        console.log("initializing LandingComponent around id="+this.res.reqId);
-        this.mdserv.getMetadata(this.res.reqId).subscribe(
+        console.log("initializing LandingComponent around id="+this.reqId);
+        this.mdserv.getMetadata(this.reqId).subscribe(
             (data) => {
                 // successful metadata request
-                this.res.md = data;
-                if (! this.res.md)
+                this.md = data;
+                if (! this.md)
                     // id not found; reroute
                     this.router.navigateByUrl("/not-found", { skipLocationChange: true });
                 else
@@ -77,29 +75,34 @@ export class LandingComponent implements OnInit {
 
     /**
      * make use of the metadata to initialize this component.  This is called asynchronously
-     * from ngOnInit after the metadata has been successfully retrieved (and saved to this.res.md).
+     * from ngOnInit after the metadata has been successfully retrieved (and saved to this.md).
      * 
      * This method will:
      *  * set the page's title (as displayed in the browser title bar).
      *  * layout the display of the identity metadata
      */
     useMetadata() : void {
-        // set the title bar title
-        this.setTitleBar();
+        // set the document title
+        this.setDocumentTitle();
         
     }
 
     /**
-     * set the browser's title bar title.  
+     * set the document's title.  
      */
-    setTitleBar() : void {
+    setDocumentTitle() : void {
         let title = "PDR: ";
-        if (this.res.md['abbrev']) title += this.res.md['abbrev'] + " - ";
-        if (this.res.md['title'])
-            title += this.res.md['title']
+        if (this.md['abbrev']) title += this.md['abbrev'] + " - ";
+        if (this.md['title'])
+            title += this.md['title']
         else
-            title += this.res.md['@id']
+            title += this.md['@id']
         this.titleSv.setTitle(title);
-    }        
+    }
+
+    /**
+     * return the current document title
+     */
+    getDocumentTitle() : string { return this.titleSv.getTitle(); }
 
 }

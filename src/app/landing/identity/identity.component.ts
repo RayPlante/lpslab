@@ -1,8 +1,7 @@
-import { Component, OnInit, ElementRef, Inject } from '@angular/core';
+import { Component, OnInit, Inject, Input } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
-import { MetadataService } from '../../nerdm/nerdm.service';
-import { NerdmRes, CurrentResource, CURRENT_RESOURCE } from '../../nerdm/nerdm';
+import { NerdmRes } from '../../nerdm/nerdm';
 
 /**
  * A component for displaying the identity metadata of a resource.  The identity information 
@@ -27,23 +26,19 @@ export class IdentityComponent implements OnInit {
     layoutMode: string = 'horizontal';
     profileMode: string = 'inline';
     resTypeName : string = "Resource";
-    id : string;
-    md : NerdmRes|null = null;
+    
+    @Input() md : NerdmRes = null;  // this should be set by the parent component
 
     /**
      * create the component.
-     * @param route   the requested URL path to be fulfilled with this view
-     * @param el      the element in the DOM where this component will be laid out.
      * @param cfg     the app configuration data
-     * @param mdserv  the MetadataService for gaining access to the NERDm metadata.
+     * @param res     the container wiht the current resource metadata to display attached
      */
-    constructor(private cfg : AppConfig, @Inject(CURRENT_RESOURCE) public res : CurrentResource)
-    { }
+    constructor(private cfg : AppConfig) { }
 
     /**
      * initialize the component.  This is called early in the lifecycle of the component by 
-     * the Angular rendering infrastructure.  This implementat fetches the metadata (which
-     * should already be cached).  
+     * the Angular rendering infrastructure.  
      */
     ngOnInit() {
         this.useMetadata();
@@ -57,7 +52,7 @@ export class IdentityComponent implements OnInit {
      *  * layout the title and resource type
      */
     useMetadata() : void {
-        switch (this.res.md["@type"][0]) {
+        switch (this.md["@type"][0]) {
             case "nrd:SRD":
                 this.resTypeName = "Standard Reference Data";
                 break;

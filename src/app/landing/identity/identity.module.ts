@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 // import { AppConfig } from '../config';
 import { IdentityComponent } from './identity.component';
+import { AuthorsComponent  } from './authors.component';
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -13,12 +14,14 @@ import { IdentityComponent } from './identity.component';
         CommonModule
     ],
     declarations: [
-        IdentityComponent
+        IdentityComponent,
+        AuthorsComponent
     ],
     providers: [
     ],
     exports: [
-        IdentityComponent
+        IdentityComponent,
+        AuthorsComponent
     ]
 })
 export class IdentityModule { }

@@ -4,16 +4,17 @@ import { TransferState } from '@angular/platform-browser';
 import { Title }    from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { IdentityComponent } from './identity.component';
-import { AngularEnvironmentConfigService } from '../../config/config.service';
-import { AppConfig } from '../../config/config'
-import { MetadataTransfer, NerdmRes } from '../../nerdm/nerdm'
-import { MetadataService, TransferMetadataService } from '../../nerdm/nerdm.service'
-import * as mock from '../../testing/mock.services';
+import { LandingModule } from './landing.module';
+import { LandingComponent } from './landing.component';
+import { AngularEnvironmentConfigService } from '../config/config.service';
+import { AppConfig } from '../config/config'
+import { MetadataTransfer, NerdmRes } from '../nerdm/nerdm'
+import { MetadataService, TransferMetadataService } from '../nerdm/nerdm.service'
+import * as mock from '../testing/mock.services';
 
-describe('IdentityComponent', () => {
-    let component : IdentityComponent;
-    let fixture : ComponentFixture<IdentityComponent>;
+describe('LandingComponent', () => {
+    let component : LandingComponent;
+    let fixture : ComponentFixture<LandingComponent>;
     let cfg : AppConfig;
     let plid : Object = "browser";
     let ts : TransferState = new TransferState();
@@ -21,7 +22,7 @@ describe('IdentityComponent', () => {
     let mdt : MetadataTransfer;
     let mds : MetadataService;
     let route : ActivatedRoute;
-    let title : Title;
+    let title : mock.MockTitle;
 
     beforeEach(() => {
         cfg = (new AngularEnvironmentConfigService(plid, ts)).getConfig() as AppConfig;
@@ -40,33 +41,40 @@ describe('IdentityComponent', () => {
 
         let r : unknown = new mock.MockActivatedRoute("/id/goober", {id: "goober"});
         route = r as ActivatedRoute;
-        // title = new mock.Title();
     });
 
-    it('should display identity metadata', () => {
+    let setupComponent = function() {
         TestBed.configureTestingModule({
-            declarations: [ IdentityComponent ],
+            imports: [ LandingModule ],
             providers: [
                 { provide: ActivatedRoute,  useValue: route },
                 { provide: ElementRef,      useValue: null },
+                { provide: Router,          useValue: null },
                 { provide: AppConfig,       useValue: cfg },
                 { provide: MetadataService, useValue: mds }
             ]
         }).compileComponents();
 
-        fixture = TestBed.createComponent(IdentityComponent);
+        fixture = TestBed.createComponent(LandingComponent);
         component = fixture.componentInstance;
-        component.md = nrd;
         fixture.detectChanges();
+    }
 
-        expect(component).toBeDefined();
-        expect(component.md.title).toBe("All About Me!");
+    it("should set title bar", function() {
+        setupComponent();
+        expect(component.getDocumentTitle()).toBe("PDR: "+nrd.title);
+    });
 
+    it("includes identity display", function() {
+        setupComponent();
         let cmpel = fixture.nativeElement;
         let el = cmpel.querySelector("h2"); 
-        expect(el.textContent).toBe(component.md.title);
-        el = cmpel.querySelector(".recordType");
-        expect(el.textContent).toBe("Standard Reference Data");
+        expect(el.textContent).toBe(nrd.title);
 
+        el = cmpel.querySelector("lp-identity");
+        expect(el).toBeDefined();
+        expect(el).not.toBeNull();
+        expect(el.children.length).toBeGreaterThan(0);
     });
+
 });

@@ -1,9 +1,8 @@
-import { Component, OnInit, ElementRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, ElementRef, Inject } from '@angular/core';
 
 import { AppConfig } from '../../config/config';
 import { MetadataService } from '../../nerdm/nerdm.service';
-import { NerdmRes } from '../../nerdm/nerdm';
+import { NerdmRes, CurrentResource, CURRENT_RESOURCE } from '../../nerdm/nerdm';
 
 /**
  * A component for displaying the identity metadata of a resource.  The identity information 
@@ -38,11 +37,8 @@ export class IdentityComponent implements OnInit {
      * @param cfg     the app configuration data
      * @param mdserv  the MetadataService for gaining access to the NERDm metadata.
      */
-    constructor(private route : ActivatedRoute, private el : ElementRef, 
-                private cfg : AppConfig, private mdserv : MetadataService)
-    {
-        this.id = this.route.snapshot.paramMap.get('id');
-    }
+    constructor(private cfg : AppConfig, @Inject(CURRENT_RESOURCE) public res : CurrentResource)
+    { }
 
     /**
      * initialize the component.  This is called early in the lifecycle of the component by 
@@ -50,10 +46,7 @@ export class IdentityComponent implements OnInit {
      * should already be cached).  
      */
     ngOnInit() {
-        this.mdserv.getMetadata(this.id).subscribe((data) => {
-            this.md = data;
-            this.useMetadata();
-        });
+        this.useMetadata();
     }
 
     /**
@@ -64,7 +57,7 @@ export class IdentityComponent implements OnInit {
      *  * layout the title and resource type
      */
     useMetadata() : void {
-        switch (this.md["@type"][0]) {
+        switch (this.res.md["@type"][0]) {
             case "nrd:SRD":
                 this.resTypeName = "Standard Reference Data";
                 break;

@@ -1,7 +1,7 @@
 /**
  * Classes and interfaces to support the NERDm metadata infrastructure
  */
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken } from '@angular/core';
 
 /**
  * a representation of a NERDm Component
@@ -108,5 +108,38 @@ export class MetadataTransfer {
             return "";
         return JSON.stringify(this.store[label], null, 2);
     }
-
 }
+
+/**
+ * a container interface for the current resource record and related information, allowing it to 
+ * be shared between parent and child components (via the CURRENT_RESOURCE injection token).
+ * 
+ * Normally, the object starts off empty.  A parent component (say, the LandingComponent) can 
+ * load the record in via a MetadataService instance.  Descendent components can read that data
+ * out or add additional data to it for sharing with its descendents.  
+ */
+export interface CurrentResource {
+
+    /**
+     * the ID of the resource that was requested by the user.  This could be anyone of the 
+     * identifiers associated with the record--the EDI-ID, the DOI, or the local ARK identifier. 
+     */
+    reqId : string;
+
+    /**
+     * the NERDm metadata record for the requested ID.
+     */
+    md : NerdmRes;
+
+    /**
+     * other properties can be added.
+     */
+    [propName: string]: any;
+}
+
+export function emptyCurrentResource() : CurrentResource {
+    return { reqId: null, md: null }
+}
+
+export const CURRENT_RESOURCE : InjectionToken<CurrentResource> =
+    new InjectionToken<CurrentResource>("current_resource");

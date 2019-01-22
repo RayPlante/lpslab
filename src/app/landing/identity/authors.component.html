@@ -1,0 +1,20 @@
+<!-- NERDm authors list -->
+<div class="" *ngIf="authors">
+  <span *ngFor="let author of authors; let i = index">
+    {{ author.fn}}<span *ngIf="i < authors.length-1 ">,</span>
+  </span>
+  <i style="cursor: pointer; margin-left: 0.5rem;" class ="faa"
+     [ngClass]="{ 'faa-plus-square-o': !expanded, 'faa-minus-square-o': expanded }"
+     aria-hidden="true" (click)="toggleView();"></i>
+</div>
+<div [collapse]="!expanded" class="card card-block card-header customcard">
+    <div class="" *ngIf="authors">
+        <span><b>Authors:</b></span>
+        <div *ngFor="let author of authors; let i = index">
+            <span>{{ author.fn}}</span>,
+            <span *ngFor="let aff of author.affiliation">
+                 <br>{{aff.title}}
+            </span>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 // import { AppConfig } from '../config';
 import { IdentityComponent } from './identity.component';
 import { AuthorsComponent  } from './authors.component';
+import { AppCommonModule } from '../../common/app.common.module'
 
 /**
  * A module supporting the complete display of landing page content associated with 
@@ -11,7 +12,8 @@ import { AuthorsComponent  } from './authors.component';
  */
 @NgModule({
     imports: [
-        CommonModule
+        CommonModule,
+        AppCommonModule
     ],
     declarations: [
         IdentityComponent,

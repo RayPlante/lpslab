@@ -1,6 +1,7 @@
 import { isPlatformServer } from '@angular/common';
 import { Observable } from 'rxjs';
 import * as rxjs from 'rxjs';
+import * as rxjsop from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import * as fs from 'fs';
 import * as proc from 'process';
@@ -172,9 +173,28 @@ export class RemoteWebMetadataService extends MetadataService {
      * @param id   the identifier of the resource to load
      */
     getMetadata(id : string) : Observable<NerdmRes> {
-        let url = this.endpoint + id;
+        let url = this.endpoint;
+        if (id.startsWith("ark:/"))
+            url += "?@id=";
+        else if (id.startsWith("doi:"))
+            url += "?doi=";
+        url += id;
+
         console.log("Pulling NERDm record from metadata service: " + url);
-        return this.webclient.get(url) as Observable<NerdmRes>;
+        let out = this.webclient.get(url) as Observable<NerdmRes>;
+
+        return out.pipe(rxjsop.map<NerdmRes, NerdmRes>(data => {
+            // strip out MongoDb search artifacts
+            if (data.hasOwnProperty("ResultData")) {
+                // search result
+                if (data.ResultData.length == 0)
+                    return null;
+                data = data.ResultData[0];
+            }
+            if (data.hasOwnProperty("_id") && data["_id"].hasOwnProperty("timestamp"))
+                delete data["_id"];
+            return data;
+        }));
     }
 
     /**

@@ -7,7 +7,7 @@ export type JSON_primitive = string|number|boolean|null;
  */
 @Component({
     selector: 'jv-pval',
-    template: `<span [style.color]="displayColor">{{display}}</span>`
+    template: `<span *ngIf="display" class="jv-pval" [style.color]="displayColor">{{display}}</span>`
 })
 export class JVPrimitiveValueComponent {
     @Input() nullColor : string = "red";

@@ -25,25 +25,36 @@ describe('JVPrimitiveComponent', function() {
     })
 
     it('types', function() {
+        let cmpel = fixture.nativeElement;
+        let el = cmpel.querySelector(".jv-pval")
+        
         cmp.value = 3;
+        fixture.detectChanges();
         expect(cmp.value).toBe(3);
         expect(cmp.displayColor).toBe("blue");
         expect(cmp.display).toBe('3');
+        expect(el.textContent).toBe(cmp.display);
 
         cmp.value = false;
+        fixture.detectChanges();
         expect(cmp.value).toBe(false);
         expect(cmp.displayColor).toBe("purple");
         expect(cmp.display).toBe('false');
+        expect(el.textContent).toBe(cmp.display);
 
         cmp.value = "hello";
+        fixture.detectChanges();
         expect(cmp.value).toBe("hello");
         expect(cmp.displayColor).toBe("green");
         expect(cmp.display).toBe('"hello"');
+        expect(el.textContent).toBe(cmp.display);
 
         cmp.value = null;
+        fixture.detectChanges();
         expect(cmp.value).toBeNull();
         expect(cmp.displayColor).toBe("red");
         expect(cmp.display).toBe('null');
+        expect(el.textContent).toBe(cmp.display);
     })
 
     it('override color', function() {

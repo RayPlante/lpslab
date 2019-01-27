@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 /**
  * a component rendering an object property composed of a name and a value
@@ -7,18 +7,34 @@ import { Component, OnInit, Input } from '@angular/core';
     selector: 'jv-prop',
     template: `
       <div class="jv-prop">
-        <div [class.withtip]="tip">
-          <span *ngIf="link; else jvp_nolink"><a [href]="link">{{name}}</a></span>
-          <ng-template #jvp_nolink><span>{{name}}</span></ng-template>
-          <span *ngIf="tip" class="tiptext">{{tip}}</span>
-        </div>:&nbsp;
+        <div class="jv-prop-box">
+          <div class="jv-prop-name">
+            <span [class.withtip]="tip">
+              <span *ngIf="link; else jvp_nolink"><a [href]="link">{{name}}</a></span>
+              <ng-template #jvp_nolink><span>{{name}}</span></ng-template>
+              <span *ngIf="tip" class="tiptext">{{tip}}</span>
+            </span>:
+          </div>
+          <div class="jv-prop-value"><jv-pval [value]="value"></jv-pval></div>
+        </div>
       </div>
 `,
     styles: [`
 .jv-prop {
   font-family: monospace;
-  min-width: 9em;
   text-align: left;
+}
+
+.jv-prop-box {
+}
+
+.jv-prop-name {
+  min-width: 10ch;
+  float: left;
+}
+
+.jv-prop-value {
+  margin: 1ch;
 }
 
 .withtip {
@@ -29,8 +45,8 @@ import { Component, OnInit, Input } from '@angular/core';
 
 .withtip .tiptext {
   visibility: hidden;
-  max-width: 20em;
-  min-width: 15em;
+  width: 30ch;
+  /* min-width: 15ch; */
   background-color: #ddddee;
   color: black;
   text-align: left;
@@ -41,7 +57,7 @@ import { Component, OnInit, Input } from '@angular/core';
   position: absolute;
   z-index: 1;
   top: 120%;
-  left: 4em;
+  left: 10ch;
   font-size: smaller;
   font-family: Arial;
   padding:  0.5em 1em 0.5em 1em;
@@ -69,4 +85,20 @@ export class JVPropertyComponent {
     @Input() name : string = null;
     @Input() link : string = null;
     @Input() tip  : string = null;
+    @Input() value : string|number|boolean|null;
+    @Input() namest : {} = {
+        "min-width": "10ch"
+    }
+
+    private _nwd = 0;
+    public set namewd(w : number) {
+        this._nwd = w;
+        if (this._nwd > 0)
+            this.namest['width'] = this._nwd + 'ch';
+        else
+            delete this.namest['width'];
+    }
+    public get namewd() { return this._nwd; }
+
+    
 }

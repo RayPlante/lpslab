@@ -1,14 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 /**
  * a component rendering an object property composed of a name and a value
  */
 @Component({
-    selector: 'jv-prop',
+    selector: 'jv-array-entry',
     template: `
-      <div class="jv-prop">
-        <jv-prop-name [name]="name" [tip]="tip" 
-                      [link]="link" [width]="namewd"></jv-prop-name>
+      <div [style.margin-left]="indent">
+        <div class="jv-arrayindex" [style.width]="idxwd">{{index}}. </div>
         <div [ngSwitch]="vtype" 
              class="jv-prop-value" [style.margin-left]="vindent">
            <jv-aval *ngSwitchCase="'array'"  
@@ -17,43 +16,43 @@ import { Component, Input, OnInit } from '@angular/core';
                     [value]="value" [indlen]="indlen"></jv-oval>
            <jv-pval *ngSwitchDefault         
                     [value]="value"></jv-pval>
+        </div>
       </div>
 `,
     styles: [`
-.jv-prop {
-  font-family: monospace;
-  text-align: left;
-}
-
-.jv-prop-name {
-  min-width: 10ch;
-  float: left;
+.jv-arrayindex {
+   font-family: Arial;
+   font-style:  oblique;
+   color:  #888888;
+   text-align: left;
+   min-width: 5ch;
+   float: left;
+   font-size: 90%;
 }
 
 .jv-prop-value {
   margin: 1ch;
+  margin-left: 0ch;
 }
 
 `]
 })
-export class JVPropertyComponent {
-    @Input() name   : string = null;
-    @Input() link   : string = null;
-    @Input() tip    : string = null;
-    @Input() value  : any = null;
-    @Input() namelen : number = 8;
-    @Input() indlen : number = 4;
+export class JVArrayEntryComponent {
+    @Input() index : number = 0;
+    @Input() value : any = null;
+    @Input() idxlen : number = 4;
+
+    @Input() step : number = 4;
+    @Input() indlen : number = 0;
 
     public get indent() : string { return JSON.stringify(this.indlen)+"ch"; }
     public get vindent() : string {
         let len = 0;
         if (typeof(this.value) != "object")
-            len = this.namelen+2;
+            len = this.idxlen+2;
         return JSON.stringify(len)+"ch";
     }
-    public get namewd() : string {
-        return JSON.stringify(this.namelen+2)+"ch";
-    }
+    public get idxwd() : string { return JSON.stringify(this.idxlen+2)+"ch"; }
 
     /**
      * a label indicating the type of the JSON value
@@ -65,8 +64,5 @@ export class JVPropertyComponent {
             this.vtype = "array";
         else
             this.vtype = typeof(this.value);
-
-        if (this.name && this.name.length > this.namelen)
-            this.namelen = this.name.length;
     }
 }

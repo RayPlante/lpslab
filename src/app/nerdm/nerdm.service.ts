@@ -8,6 +8,7 @@ import * as proc from 'process';
 
 import { AppConfig } from '../config/config';
 import { NerdmRes, MetadataTransfer  } from './nerdm';
+import * as ngenv from '../../environments/environment';
 
 export const NERDM_MT_PREFIX = "NERDm Resource:";
 
@@ -18,8 +19,7 @@ export const NERDM_MT_PREFIX = "NERDm Resource:";
 export abstract class MetadataService {
 
     /**
-     * retrieve the metadata associated with the current identifier (set at 
-     * construction time).
+     * retrieve the metadata associated with the current identifier.
      * 
      * @param id        the NERDm record's identifier
      * @return Observable<NerdmRes>    an Observable that will resolve to a NERDm record
@@ -76,8 +76,7 @@ export class ServerDiskCacheMetadataService extends MetadataService {
     constructor(private cachedir : string) { super(); }
 
     /**
-     * retrieve the metadata associated with the current identifier (set at 
-     * construction time).
+     * retrieve the metadata associated with the current identifier.
      *
      * This implementation will also cache the loaded metadata to the MetadataTransfer 
      * instance (if provided at construction) for transfer to the client.
@@ -132,8 +131,7 @@ export class TransferMetadataService extends MetadataService {
     constructor(private mdtrx : MetadataTransfer) { super(); }
 
     /**
-     * retrieve the metadata associated with the current identifier (set at 
-     * construction time).
+     * retrieve the metadata associated with the current identifier.
      *
      * This implementation will also cache the loaded metadata to the MetadataTransfer 
      * instance (if provided at construction) for transfer to the client.
@@ -164,8 +162,7 @@ export class RemoteWebMetadataService extends MetadataService {
     constructor(private endpoint : string, private webclient : HttpClient) { super(); }
 
     /**
-     * retrieve the metadata associated with the current identifier (set at 
-     * construction time).
+     * retrieve the metadata associated with the current identifier.
      *
      * This implementation will also cache the loaded metadata to the MetadataTransfer 
      * instance (if provided at construction) for transfer to the client.
@@ -225,6 +222,38 @@ export class TransmittingMetadataService extends CachingMetadataService {
 }
 
 /**
+ * A Metadata service that accesses test NERDm records stashed in the angular environment
+ * property, `testdata`.  
+ */
+export class AngularEnvironmentMetadataService extends MetadataService {
+
+    constructor() {
+        super();
+        if (! ngenv.testdata)
+            throw new Error("No test data encoded into angular environment");
+        if (Object.keys(ngenv.testdata).length <= 0)
+            console.warn("No NERDm records included in the angular environment");
+        
+        console.log("Loading NERDm records from angular environment; available record ids: ")
+        let idmsg : string = "  "
+        for(let key of Object.keys(ngenv.testdata)) {
+            idmsg += key + " "
+        }
+        console.log(idmsg);
+    }
+
+    /**
+     * retrieve the metadata associated with the current identifier
+     * 
+     * @param id        the NERDm record's identifier
+     * @return Observable<NerdmRes>    an Observable that will resolve to a NERDm record
+     */
+    getMetadata(id : string) : Observable<NerdmRes> {
+        return rxjs.of(ngenv.testdata[id]);
+    }
+}
+
+/**
  * create a MetadataService based on the runtime context
  * 
  * @param platid     the PLATFORM_ID for determining if we are running on the server
@@ -263,13 +292,18 @@ export function createMetadataService(platid : Object, endpoint : string, httpCl
         }
     }
     else if (mdtrx && mdtrx.labels().length > 0) {
-        // we're in the browser; rely on the MetadataTransfer exclusively
+        // we're in the browser and the web page contains an embedded record;
+        // rely on the MetadataTransfer exclusively
         console.log("Will load NERDm record from embedded JSON");
         return new TransferMetadataService(mdtrx);
     }
-    else {
+    else if (ngenv.context.useMetadataService) {
         console.log("Will load NERDm records from remote web service: " + endpoint);
         svc = new RemoteWebMetadataService(endpoint, httpClient);
+    }
+    else {
+        console.log("Will use test NERDm records from the angular environment.");
+        return new AngularEnvironmentMetadataService();
     }
 
     return new CachingMetadataService(svc);

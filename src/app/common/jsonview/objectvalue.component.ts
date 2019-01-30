@@ -8,6 +8,7 @@ import { Component, OnInit, Input } from '@angular/core';
     template: `
       <span *ngIf="expanded; else jv_closedobject">
         {{'{'}} <span style="cursor: pointer;" (click)="collapseView()">-</span>
+        <span class="jv-placeholder">&nbsp; set of sub-properties: </span>
         <span *ngFor="let item of value | keyvalue">
           <div [style.margin-left]="indent">
             <jv-prop [name]="item.key" [value]="item.value"

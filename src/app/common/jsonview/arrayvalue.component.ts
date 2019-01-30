@@ -10,6 +10,7 @@ export type JSON_primitive = string|number|boolean|null;
     template: `
       <span *ngIf="expanded; else jv_closedarray">
         [ <span style="cursor: pointer;" (click)="collapseView()">-</span>
+        <span class="jv-placeholder">&nbsp; list of values:</span>
         <span *ngFor="let value of vals; let i = index">
           <jv-array-entry [index]="i" [value]="value" 
                           [indlen]="indlen" [idxlen]="idxlen"></jv-array-entry>

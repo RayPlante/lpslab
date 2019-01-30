@@ -18,6 +18,9 @@ import { Component, Input } from '@angular/core';
 .jv-prop-name {
   min-width: 10ch;
   float: left;
+  background-color: #eeeeee;
+  border-radius: 5px;
+  padding-left: 5px;
 }
 
 .withtip {

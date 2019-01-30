@@ -11,7 +11,7 @@ import { Component, Input, OnInit } from '@angular/core';
                       [link]="link" [width]="namewd"></jv-prop-name>
         <div [ngSwitch]="vtype" 
              class="jv-prop-value" [style.margin-left]="vindent">
-           <jv-aval *ngSwitchCase="'array'"  
+           <jv-aval *ngSwitchCase="'array'" [expanded]="(!name.startsWith('_') && name!='@context')" 
                     [vals]="value" [indlen]="indlen"></jv-aval>
            <jv-oval *ngSwitchCase="'object'"
                     [value]="value" [indlen]="indlen"></jv-oval>
@@ -32,6 +32,14 @@ import { Component, Input, OnInit } from '@angular/core';
 
 .jv-prop-value {
   margin: 1ch;
+  transition-property: background-color;
+  transition-duration: 1s;
+}
+
+.jv-prop-value:hover {
+  margin: 1ch;
+  background-color: #cccccc;
+  border-radius: 5px;
 }
 
 `]
@@ -52,7 +60,7 @@ export class JVPropertyComponent {
         return JSON.stringify(len)+"ch";
     }
     public get namewd() : string {
-        return JSON.stringify(this.namelen+2)+"ch";
+        return JSON.stringify(this.namelen+3)+"ch";
     }
 
     /**

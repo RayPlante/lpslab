@@ -10,6 +10,7 @@ import { JVArrayPropertyComponent } from './arrayprop.component';
 import { JVObjectPropertyComponent } from './objectproperty.component'; 
 import { JVPropertyComponent } from './property.component'; 
 import { JVPropertyNameComponent } from './propname.component'; 
+import { JVMetadataComponent } from './metadata.component'; 
 
 /**
  * a module of components for displaying JSON data.
@@ -27,7 +28,8 @@ import { JVPropertyNameComponent } from './propname.component';
         JVPrimitivePropertyComponent,
         JVArrayPropertyComponent,
         JVObjectPropertyComponent,
-        JVPropertyComponent
+        JVPropertyComponent,
+        JVMetadataComponent
     ],
     providers: [ ],
     exports: [
@@ -39,7 +41,8 @@ import { JVPropertyNameComponent } from './propname.component';
         JVPrimitivePropertyComponent,
         JVArrayPropertyComponent,
         JVObjectPropertyComponent,
-        JVPropertyComponent
+        JVPropertyComponent,
+        JVMetadataComponent
     ]
 })
 export class JSONViewModule { }
@@ -48,4 +51,5 @@ export { JSON_primitive } from './primitivevalue.component';
 export { JVPrimitiveValueComponent, JVArrayValueComponent,
          JVObjectValueComponent,
          JVPropertyNameComponent, JVPropertyComponent, JVObjectPropertyComponent,
-         JVPrimitivePropertyComponent, JVArrayPropertyComponent }
+         JVPrimitivePropertyComponent, JVArrayPropertyComponent,
+         JVMetadataComponent }

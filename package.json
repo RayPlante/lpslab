@@ -49,10 +49,12 @@
     "bootstrap": "^4.1.2",
     "core-js": "^2.4.1",
     "express": "^4.15.2",
+    "ngx-filesaver": "^2.2.0",
     "primeicons": "^1.0.0-beta.9",
     "primeng": "^6.0.1",
     "reflect-metadata": "^0.1.10",
     "rxjs": "6.3.3",
+    "rxjs-compat": "6.3.3",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {

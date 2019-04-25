@@ -39,6 +39,6 @@ import { CommonVarService } from '../../shared/common-var'
         const app = fixture.debugElement.componentInstance;
         expect(app).toBeTruthy();
       }));
-  });
  */
+  });
 

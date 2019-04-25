@@ -1,4 +1,4 @@
-import { Inject } from '@angular/core';
+import { Inject, InjectionToken } from '@angular/core';
 import { isPlatformServer } from '@angular/common';
 import { TransferState, makeStateKey, StateKey } from '@angular/platform-browser';
 import * as proc from 'process';
@@ -9,6 +9,7 @@ import * as ngenv from '../../environments/environment';
 
 export const CONFIG_KEY_NAME : string = "LPSConfig";
 export const CONFIG_TS_KEY : StateKey<string> = makeStateKey(CONFIG_KEY_NAME);
+export const CFG_DATA : InjectionToken<LPSConfig> = new InjectionToken<LPSConfig>("lpsconfig");
 
 /**
  * create a deep copy of an object
@@ -49,7 +50,6 @@ export function deepCopy(obj) {
     throw new Error("Unable to copy obj! Its type isn't supported.");
 }
 
-
 /**
  * a service that will create an AppConfig instance loaded with values 
  * approriate for the runtime context.
@@ -60,7 +60,7 @@ export abstract class ConfigService {
      * return an AppConfig instance that is appropriate for the runtime 
      * context.
      */
-    abstract getConfig() : AppConfig|Promise<AppConfig>; 
+    abstract getConfig() : AppConfig; 
     
 }
 
@@ -74,20 +74,38 @@ export abstract class ConfigService {
 export class AngularEnvironmentConfigService extends ConfigService {
     private source : string = "angular-env";
     private defMode : string = "dev";
+    private config : AppConfig|null = null;
+
+    /**
+     * construct the service
+     * @param platid   the PLATFORM_ID value for determining if we are running on the server
+     *                 or in the browser.
+     * @param cache    the TransferState instance for the application.  If we are on the server,
+     *                 getConfig() will cache the configuration to the TransferState object.
+     */
+    constructor(private platid : object, private cache : TransferState) {
+        super();
+    }
 
     /**
      * return an AppConfig instance that is appropriate for the runtime 
      * context.  This will asynchronously return an AppConfig rather than a 
      * Promise.  
      */
-    getConfig() : AppConfig|Promise<AppConfig> {
-        console.log("Loading development-mode configuration data from the Angular built-in environment");
-        let data : LPSConfig = deepCopy(ngenv.config);
-        let out : AppConfig = new AppConfig(data);
-        out["source"] = this.source;
-        if (!out["env"]) 
-            out["env"] = this.defMode;
-        return out;
+    getConfig() : AppConfig {
+        if (! this.config) {
+            console.log("Loading development-mode configuration data from the Angular built-in environment");
+            let data : LPSConfig = deepCopy(ngenv.config);
+            let out : AppConfig = new AppConfig(data);
+            out["source"] = this.source;
+            if (! out["env"]) 
+                out["env"] = this.defMode;
+
+            if (isPlatformServer(this.platid))
+                this.cache.set(CONFIG_TS_KEY, out);
+            this.config = out;
+        }
+        return this.config;
     }
 }
 
@@ -105,16 +123,15 @@ export class ServerFileConfigService extends ConfigService {
 
     private source : string = "server-file";
     private defMode : string = "prod";       // i.e. in the docker context
-    private out : AppConfig|null = null;
+    private config : AppConfig|null = null;
 
     /**
      * construct the service.  
      * 
      * @param cfgfile   the (full) path to the file to read JSON-encoded data from
-     * @throw Error -- if OAR_CONFIG_FILE is not set or does not point to an 
-     *                 existing file.  
+     * @throw Error -- if cfgfile is not set or does not point to an existing file.  
      */
-    constructor(private cfgfile : string) {
+    constructor(private cfgfile : string, private cache? : TransferState) {
         super();
         if (! cfgfile)
             throw new Error("Configuration file not provided");
@@ -126,29 +143,55 @@ export class ServerFileConfigService extends ConfigService {
 
     /**
      * return an AppConfig instance that is appropriate for the runtime 
-     * context.  This implementation typically returns a Promise which will result in an 
-     * Error if there is trouble reading the file.  If the data was successfully read
-     * already, an actual AppConfig instance will be returned.
+     * context.  This implementation reads the config data from a JSON file. 
      */
-    getConfig() : AppConfig|Promise<AppConfig> {
-        if (this.out)
-            return this.out;  // previously created AppConfig
+    getConfig() : AppConfig {
+        if (this.config)
+            return this.config;  // previously created AppConfig
 
         console.log("Loading configuration data from " + this.cfgfile);
 
-        return new Promise<AppConfig>((resolve, reject) => {
-            fs.readFile(this.cfgfile, 'utf8', (err, data) => {
-                if (err) throw err;
+        // synchronous read.  (The file is typically short.)
+        let out : LPSConfig = JSON.parse(fs.readFileSync(this.cfgfile, 'utf8'));
+        out["source"] = this.source;
+        if (! out["mode"])
+            out["mode"] = this.defMode;
 
-                let cfg : LPSConfig = JSON.parse(data);
-                cfg["source"] = this.source;
-                if (! cfg["mode"])
-                    cfg["mode"] = this.defMode;
-                this.out = new AppConfig(cfg);
-                
-                resolve(this.out);
-            });
-        });
+        this.config = new AppConfig(out);
+        if (this.cache)
+            this.cache.set(CONFIG_TS_KEY, this.config);
+        return this.config;
+    }
+}
+
+/**
+ * a server-side ConfigService that provides data that was loaded in when the 
+ * server started. 
+ */
+export class ServerLoadedConfigService extends ConfigService {
+    private config : AppConfig|null = null;
+
+    constructor(private cfgdata : LPSConfig, private cache? : TransferState) {
+        super();
+        if (! cfgdata)
+            throw new Error("Server failed to load config data");
+    }
+
+    /**
+     * return an AppConfig instance that is appropriate for the runtime context.  
+     * This implementation loads that that was previously loaded by the server at 
+     * start-up time.  
+     */
+    getConfig() : AppConfig {
+        if (this.config)
+            return this.config;  // previously created AppConfig
+
+        console.log("Loading configuration data previously loaded by server");
+
+        this.config = new AppConfig(this.cfgdata);
+        if (this.cache)
+            this.cache.set(CONFIG_TS_KEY, this.config);
+        return this.config;
     }
 }
 
@@ -174,7 +217,9 @@ export class TransferStateConfigService extends ConfigService {
      * context.  This implementation extracts the configuration data from 
      * the transfer state.
      */
-    getConfig() : AppConfig|Promise<AppConfig> {
+    getConfig() : AppConfig {
+        console.log("Loading configuration data delivered from the server.");
+
         let data : LPSConfig|null = this.cache.get(CONFIG_TS_KEY, null) as LPSConfig;
         if (! data)
             throw new Error("Missing key from transfer state: " + CONFIG_KEY_NAME)
@@ -196,17 +241,31 @@ export class TransferStateConfigService extends ConfigService {
  * on the server, we can retrieve the data from a local file whose path
  * is set in the OS environment variable (OAR_CONFIG_FILE).  If that is 
  * not set, we can assume we are running in development-server mode.
+ *
+ * @param platid    the PLATFORM_ID for determining if we are running on the server
+ * @param cache     a TransferState instance to check for config data
+ * @param cfgdata   (optional) LPSConfig object that contains the configuration data loaded 
+ *                    explicitly by some other means.  (This hook is intended for future 
+ *                    ways of loading the configuration data on the server.)
  */
-export function newConfigService(platid : Object, cache : TransferState)
+export function newConfigService(platid : Object, cache : TransferState, cfgdata? : LPSConfig)
     : ConfigService
 {
     if (cache.hasKey(CONFIG_TS_KEY))
         // this means we're on (should be) on the browser side
         return new TransferStateConfigService(cache);
 
-    if (isPlatformServer(this.platid) && proc.env["OAR_CONFIG_FILE"])
+    if (isPlatformServer(platid) && cfgdata)
         // this means we're on the server in production-like mode
-        return new ServerFileConfigService(proc.env["OAR_CONFIG_FILE"])
+        // this will stash the data into the TransferState
+        return new ServerLoadedConfigService(cfgdata, cache)
 
-    return new AngularEnvironmentConfigService();
+    if (isPlatformServer(platid) && proc.env["PDR_CONFIG_FILE"])
+        // this means we're on the server in production-like mode
+        // this will stash the data into the TransferState
+        return new ServerFileConfigService(proc.env["PDR_CONFIG_FILE"], cache)
+
+    // This is the default intended for a development context
+    // this will stash the data into the TransferState
+    return new AngularEnvironmentConfigService(platid, cache);
 }

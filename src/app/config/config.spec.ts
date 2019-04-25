@@ -77,8 +77,9 @@ describe("config.AppConfig", function() {
         expect(cfg.get("status", "testing")).toBe("review");
 
         expect(cfg.get("locations.orgHome", "nowhere")).toBe("https://nist.gov/");
-        expect(cfg.get("locations.pdrSearch", "nowhere")).toBe("nowhere");
+        expect(cfg.get("locations.pdrSearch", "nowhere")).toBe("https://data.nist.gov/sdp/");
         expect(cfg.get("locations.hell")).toBe(undefined);
+        expect(cfg.get("locations.hell", "nowhere")).toBe("nowhere");
         
     });
 });

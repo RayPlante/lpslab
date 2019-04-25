@@ -22,7 +22,9 @@ describe("config.service deepcopy", function() {
 });
 
 describe("config.service AngularEnvironmentConfigService", function() {
-    let svc = new cfgsvc.AngularEnvironmentConfigService();
+    let plid : Object = "browser";
+    let ts : TransferState = new TransferState();
+    let svc = new cfgsvc.AngularEnvironmentConfigService(plid, ts);
 
     it("getConfig()", function() {
         let ac : cfg.AppConfig = svc.getConfig() as cfg.AppConfig;
@@ -70,5 +72,6 @@ describe("config.service newConfigService", function() {
         expect(ac["mode"]).toBe("prod");
         expect(ac["source"]).toBe("transfer-state");
     });
+
 });
 

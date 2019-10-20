@@ -131,7 +131,7 @@ export class AppConfig implements LPSConfig {
         if (! this.locations.distService)
             this.locations.distService = this.locations.portalBase + "od/ds/";
         if (! this.locations.mdService)
-            this.locations.mdService = this.locations.portalBase + "rmm/";
+            this.locations.mdService = this.locations.portalBase + "rmm/records/";
         if (! this.locations.nerdmAbout)
             this.locations.nerdmAbout = this.locations.portalBase + "od/dm/aboutNerdm.html";
 

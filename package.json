@@ -6,15 +6,7 @@
     "type": "git",
     "url": "https://github.com/angular/universal-starter.git"
   },
-  "contributors": [
-    "AngularClass <hello@angularclass.com>",
-    "PatrickJS <patrick@angularclass.com>",
-    "Jeff Whelpley <jeff@gethuman.com>",
-    "Jeff Cross <crossj@google.com>",
-    "Mark Pieszak <mpieszak84@gmail.com>",
-    "Jason Jean <jasonjean1993@gmail.com>",
-    "Fabian Wiles <fabian.wiles@gmail.com>"
-  ],
+  "contributors": [],
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -46,9 +38,12 @@
     "@nguniversal/common": "^7.0.2",
     "@nguniversal/express-engine": "^7.0.2",
     "@nguniversal/module-map-ngfactory-loader": "^7.0.2",
+    "angular-archwizard": "^5.0.0",
     "bootstrap": "^4.1.2",
     "core-js": "^2.4.1",
     "express": "^4.15.2",
+    "ng-sidebar": "^9.1.1",
+    "primeflex": "^1.0.0-rc.1",
     "primeicons": "^1.0.0-beta.9",
     "primeng": "^6.0.1",
     "reflect-metadata": "^0.1.10",

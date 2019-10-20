@@ -10,6 +10,7 @@ import { ConfigModule } from './config/config.module';
 import { NerdmModule } from './nerdm/nerdm.module';
 import { ErrorsModule, AppErrorHandler } from './errors/errors.module';
 import { LandingModule } from './landing/landing.module';
+import { CreateModule } from './create/create.module'; 
 import { AppRoutingModule } from './app-routing.module';
 
 /**
@@ -23,6 +24,7 @@ import { AppRoutingModule } from './app-routing.module';
         FrameModule,
         ErrorsModule,
         LandingModule,
+        CreateModule,
         AppRoutingModule
     ],
     declarations: [
